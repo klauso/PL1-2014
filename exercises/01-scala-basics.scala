@@ -83,7 +83,7 @@ object AE extends App {
 //      - how long you study ("Fachsemester")
 // 1. install Scala
 // 2. experiment with this file
-// 3. add Negation
+// 3. add Subtraction
 // 4. implement eval without pattern matching
 //
 // Send question by email to rendel@informatik.uni-tuebingen.de
