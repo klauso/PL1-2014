@@ -7,7 +7,7 @@ Schedule
 --------
 
  * October 14. Lecture: [Introduction](lecturenotes/01-intro.markdown)
- * October 16. Exercise:  Scala basics
+ * October 16. Exercise:  [Scala basics](exercises/01-scala-basics.scala)
  * October 20. *canceled*
  * October 21. *canceled*
  * October 23. *canceled*
