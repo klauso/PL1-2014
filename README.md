@@ -27,5 +27,5 @@ Homework
 
 You have to hand in reasonable homework for all but one assignment to attend the exam. Work in groups of 1 or 2 students. Hand in the homework as Scala source files by email to rendel@informatik.uni-tuebingen.de. The final grade is the grade of the exam.
 
- * Hand in before Friday evening, October 17:  
+ * Hand in before Friday evening, October 24:  
    assignments at the end of [exercises/01-scala-basics.scala](exercises/01-scala-basics.scala).
