@@ -47,7 +47,7 @@ object PatternMatching {
 }
 
 
-object AE extends App {
+object AE {
   // Abstract Syntax Tree
   trait Exp
   case class Num(n: Int) extends Exp
