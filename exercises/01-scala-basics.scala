@@ -49,18 +49,18 @@ object PatternMatching {
 
 object AE extends App {
   // Abstract Syntax Tree
-  trait Expression
-  case class Literal(n: Int) extends Expression
-  case class Addition(lhs: Expression, rhs: Expression) extends Expression
+  trait Exp
+  case class Num(n: Int) extends Exp
+  case class Add(lhs: Exp, rhs: Exp) extends Exp
 
   // Example
-  val onePlusThree = Addition(Literal(1), Addition(Literal(5), Literal(3)))
+  val onePlusEight = Add(Num(1), Add(Num(5), Num(3)))
 
   // Interpreter
-  def eval(e: Expression): Int =
+  def eval(e: Exp): Int =
     e match {
-      case Literal(n) => n
-      case Addition(lhs, rhs) =>
+      case Num(n) => n
+      case Add(lhs, rhs) =>
         eval(lhs) + eval(rhs)
     }
 }
