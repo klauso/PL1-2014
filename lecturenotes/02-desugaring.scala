@@ -36,13 +36,13 @@ object AE {
  * core language and syntactic sugar.
  * 
  * For illustration, consider the following proposed extensions to the language:
- *  1. Multiplication
- *  2. Subtraction
+ *  1. Mult
+ *  2. Sub
  *  3. Unary Negation 
  *
  * Extension number 1 is a good example for a core language extension.
- * We have no way of expressing multiplication in terms of the existing 
- * constructs (if we had some looping construct we could express multiplication
+ * We have no way of expressing mult in terms of the existing 
+ * constructs (if we had some looping construct we could express mult
  * as repeated Add but we do not have loops).
  * 
  * Hence we add this language construct to the (core) language:
@@ -53,21 +53,21 @@ object MAE {
   sealed trait Exp
   case class Num(n: Int) extends Exp
   case class Add(lhs: Exp, rhs: Exp) extends Exp
-  case class Multiplication(lhs: Exp, rhs: Exp) extends Exp
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
   // Example
-  val ex = Add(Num(1), Multiplication(Num(5), Num(3)))
+  val ex = Add(Num(1), Mult(Num(5), Num(3)))
 
   // Interpreter
   def eval(e: Exp): Int =
     e match {
       case Num(n) => n
       case Add(lhs, rhs) => eval(lhs) + eval(rhs)
-      case Multiplication(lhs, rhs) =>  eval(lhs) * eval(rhs)
+      case Mult(lhs, rhs) =>  eval(lhs) * eval(rhs)
     }
 }
 
-/* Let us now consider extension #2, subtraction. One way to support subtraction is
- * to add it to the core language, just like multiplication: 
+/* Let us now consider extension #2, sub. One way to support sub is
+ * to add it to the core language, just like mult: 
  */
 
 object SMAE {
@@ -75,22 +75,22 @@ object SMAE {
   sealed trait Exp
   case class Num(n: Int) extends Exp
   case class Add(lhs: Exp, rhs: Exp) extends Exp
-  case class Multiplication(lhs: Exp, rhs: Exp) extends Exp
-  case class Subtraction(lhs: Exp, rhs: Exp) extends Exp
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
+  case class Sub(lhs: Exp, rhs: Exp) extends Exp
   // Example
-  val ex = Subtraction(Num(1), Multiplication(Num(5), Num(3)))
+  val ex = Sub(Num(1), Mult(Num(5), Num(3)))
 
   // Interpreter
   def eval(e: Exp): Int =
     e match {
       case Num(n) => n
       case Add(lhs, rhs) => eval(lhs) + eval(rhs)
-      case Multiplication(lhs, rhs) =>  eval(lhs) * eval(rhs)
-      case Subtraction(lhs, rhs) =>  eval(lhs) - eval(rhs)
+      case Mult(lhs, rhs) =>  eval(lhs) * eval(rhs)
+      case Sub(lhs, rhs) =>  eval(lhs) - eval(rhs)
     }
 }
 
-/* However, another way of adding subtraction is to treat it as syntactic sugar
+/* However, another way of adding sub is to treat it as syntactic sugar
  * using the fact that a - b = a + (-1 * b)
  *
  * One way of expressing the desugaring is as a syntax transformation: */
@@ -98,10 +98,10 @@ object SMAE {
 def desugarSMAE2MAE(e: SMAE.Exp) : MAE.Exp = e match {
   case SMAE.Num(n) => MAE.Num(n)
   case SMAE.Add(lhs, rhs) => MAE.Add(desugarSMAE2MAE(lhs), desugarSMAE2MAE(rhs))
-  case SMAE.Multiplication(lhs, rhs) => MAE.Multiplication(desugarSMAE2MAE(lhs), desugarSMAE2MAE(rhs)) 
-  case SMAE.Subtraction(lhs, rhs) => 
+  case SMAE.Mult(lhs, rhs) => MAE.Mult(desugarSMAE2MAE(lhs), desugarSMAE2MAE(rhs)) 
+  case SMAE.Sub(lhs, rhs) => 
     MAE.Add(desugarSMAE2MAE(lhs), 
-                 MAE.Multiplication(MAE.Num(-1),desugarSMAE2MAE(rhs)))
+                 MAE.Mult(MAE.Num(-1),desugarSMAE2MAE(rhs)))
 }
 
 /* With this desugaring in place, we do not need an interpreter for SMAE anymore; rather
@@ -125,20 +125,20 @@ object SMAE2 {
   sealed trait Exp
   case class Num(n: Int) extends Exp
   case class Add(lhs: Exp, rhs: Exp) extends Exp
-  case class Multiplication(lhs: Exp, rhs: Exp) extends Exp
-  def subtraction(e1: Exp, e2: Exp) : Exp =
-    Add(e1, Multiplication(Num(-1), e2))
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
+  def sub(e1: Exp, e2: Exp) : Exp =
+    Add(e1, Mult(Num(-1), e2))
   
-  // Compared to SMAE, we only have to change upper case Subtraction by lower case subtraction
+  // Compared to SMAE, we only have to change upper case Sub by lower case sub
   // when constructing examples.
-  val ex = subtraction(Num(1), Multiplication(Num(5), Num(3)))
+  val ex = sub(Num(1), Mult(Num(5), Num(3)))
 
-  // Interpreter - no case for subtraction needed
+  // Interpreter - no case for sub needed
   def eval(e: Exp): Int =
     e match {
       case Num(n) => n
       case Add(lhs, rhs) => eval(lhs) + eval(rhs)
-      case Multiplication(lhs, rhs) =>  eval(lhs) * eval(rhs)
+      case Mult(lhs, rhs) =>  eval(lhs) * eval(rhs)
     }
 }
 
@@ -156,20 +156,20 @@ object USMAE {
   sealed trait Exp
   case class Num(n: Int) extends Exp
   case class Add(lhs: Exp, rhs: Exp) extends Exp
-  case class Multiplication(lhs: Exp, rhs: Exp) extends Exp
-  def subtraction(e1: Exp, e2: Exp) : Exp =
-    Add(e1, Multiplication(Num(-1), e2))
-  def unaryminus(e: Exp) = subtraction(Num(0), e)
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
+  def sub(e1: Exp, e2: Exp) : Exp =
+    Add(e1, Mult(Num(-1), e2))
+  def unaryminus(e: Exp) = sub(Num(0), e)
   
-  // Compared to SMAE, we only have to change upper case Subtraction by lower case subtraction
+  // Compared to SMAE, we only have to change upper case Sub by lower case sub
   // when constructing examples.
-  val ex = subtraction(unaryminus(Num(1)), Multiplication(Num(5), Num(3)))
+  val ex = sub(unaryminus(Num(1)), Mult(Num(5), Num(3)))
 
-  // Interpreter - no case for subtraction needed
+  // Interpreter - no case for sub needed
   def eval(e: Exp): Int =
     e match {
       case Num(n) => n
       case Add(lhs, rhs) => eval(lhs) + eval(rhs)
-      case Multiplication(lhs, rhs) =>  eval(lhs) * eval(rhs)
+      case Mult(lhs, rhs) =>  eval(lhs) * eval(rhs)
     }
 }
