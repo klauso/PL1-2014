@@ -1,5 +1,5 @@
 /*
-These are lecture notes for the "Programming Languages and Types" at the University of Tübingen.
+These are lecture notes for the "Programming Languages I" course at the University of Tübingen.
 
 loosely based on Sec. 4 of the 2nd edition of the book 
 "Programming Languages: Application and Interpretation" by Shriram Krishnamurthi

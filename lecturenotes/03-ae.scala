@@ -1,5 +1,5 @@
 /*
-These are lecture notes for the "Programming Languages and Types" at the University of Tübingen.
+These are lecture notes for the "Programming Languages I" course at the University of Tübingen.
 
 Please send comments or errors in these notes via email to Klaus Ostermann.
 My email address can be found on my webpage. Alternatively, you can also 
