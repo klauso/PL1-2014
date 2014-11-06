@@ -13,7 +13,7 @@ Schedule
  * October 23. *canceled*
  * October 27. Lecture
  * October 28. Lecture
- * October 30. Exercise
+ * October 30. Exercise: [Pattern matching & alternatives](exercises/02-pattern-matching.scala)
  * November 3. Exercise
  * November 4. Lecture
  * November 6. Lecture
@@ -29,3 +29,5 @@ You have to hand in reasonable homework for all but one assignment to attend the
 
  * Hand in before Friday evening, October 24:  
    assignments at the end of [exercises/01-scala-basics.scala](exercises/01-scala-basics.scala).
+ * Hand in before Friday evening, November 14:
+   assignment at the end of [exercises/02-pattern-matching.scala](exercises/02-pattern-matching.scala).
