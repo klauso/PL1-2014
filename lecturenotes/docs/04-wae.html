@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>04-wae.scala</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+        /*--------------------- Layout and Typography ----------------------------*/
+        body {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+            font-size: 15px;
+            line-height: 22px;
+            color: #252519;
+            margin: 0; padding: 0;
+        }
+        a {
+            color: #261a3b;
+        }
+        a:visited {
+            color: #261a3b;
+        }
+        p {
+            margin: 0 0 15px 0;
+        }
+        h4, h5, h6 {
+            color: #333;
+            padding: 6px 0 6px 0;
+            font-size: 13px;
+        }
+        h2, h3 {
+            padding-bottom: 15px;
+            color: #000;
+            overflow: hidden;
+        }
+        h1 {
+            /*padding-top: 40px;*/
+            padding-bottom: 15px;
+            color: #000;
+        }
+        #container {
+            position: relative;
+        }
+        /*#background {
+            position: fixed;
+            top: 0; left: 525px; right: 0; bottom: 0;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+            z-index: -1;
+        }*/
+        #jump_to, #jump_page {
+            background: white;
+            -webkit-box-shadow: 0 0 25px #777; -moz-box-shadow: 0 0 25px #777;
+            -webkit-border-bottom-left-radius: 5px; -moz-border-radius-bottomleft: 5px;
+            font: 10px Arial;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: right;
+        }
+        #jump_to, #jump_wrapper {
+            position: fixed;
+            right: 0; top: 0;
+            padding: 5px 10px;
+        }
+        #jump_wrapper {
+            padding: 0;
+            display: none;
+        }
+        #jump_to:hover #jump_wrapper {
+            display: block;
+        }
+        #jump_page {
+            padding: 5px 0 3px;
+            margin: 0 0 25px 25px;
+        }
+        #jump_page .source {
+            display: block;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-top: 1px solid #eee;
+        }
+        #jump_page .source:hover {
+            background: #f5f5ff;
+        }
+        #jump_page .source:first-child {
+        }
+        table td {
+            border: 0;
+            outline: 0;
+        }
+        td.docs, th.docs {
+            max-width: 450px;
+            min-width: 450px;
+            min-height: 5px;
+            padding: 10px 25px 1px 50px;
+            overflow-x: hidden;
+            vertical-align: top;
+            text-align: left;
+        }
+        .docs pre {
+            margin: 15px 0 15px;
+            padding-left: 15px;
+        }
+        .docs p tt, .docs p code, .doc code {
+            background: #f8f8ff;
+            border: 1px solid #dedede;
+            font-size: 12px;
+            padding: 0 0.2em;
+        }
+        .pilwrap {
+            position: relative;
+        }
+        .pilcrow {
+            font: 12px Arial;
+            text-decoration: none;
+            color: #454545;
+            position: absolute;
+            top: 3px; left: -20px;
+            padding: 1px 2px;
+            opacity: 0;
+            -webkit-transition: opacity 0.2s linear;
+        }
+        td.docs:hover .pilcrow {
+            opacity: 1;
+        }
+        td.code, th.code {
+            padding: 10px 10px 10px 50px;
+            width: 100%;
+            vertical-align: top;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+        }
+        pre, tt, code {
+            font-size: 12px; line-height: 18px;
+            font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+            margin: 0; padding: 0;
+        }
+
+        /*---------------------- Prettify Syntax Highlighting -----------------------------*/
+        .str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}
+
+        table.doc { margin-bottom: 20px; }
+        td.doc { border-bottom: 1px dashed #708090; }
+        td.param { font-weight: bold; }
+        td.return { font-weight: bold; text-decoration: underline; }
+    </style>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
+    <script src="https://google-code-prettify.googlecode.com/svn/trunk/src/lang-scala.js" type="text/javascript"></script>
+</head>
+
+<body onload="prettyPrint()">
+<div id="container">
+    <div id="background"></div>
+    <div id="jump_to">
+        Jump To &hellip;
+        <div id="jump_wrapper">
+            <div id="jump_page">
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/01-intro.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/01-intro.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/03-ae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/03-ae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/04-wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/04-wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/06-fae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/06-fae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html
+                </a>
+                
+            </div>
+        </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th class="docs">
+                <h1>04-wae.scala</h1>
+            </th>
+            <th class="code"></th>
+        </tr>
+        </thead>
+        <tbody>
+        
+        <tr id="section_0">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_0">&#182;</a>
+                </div>
+                <h1>Name Binding</h1>
+<p>We want, step by step, to develop our primitive calculator language into a full-fledged PL.</p>
+<p>One important milestone on this way is the ability to deal with names. While our previous language allowed expressions with identifiers in them, it had no <em>binders</em> : Constructs that allow to give meaning to a new name.</p>
+<p>In this variant of the language, called WAE, we introduce such a binder called &ldquo;with&rdquo; with which we can give an expression a name that can be used in the body of the &ldquo;with&rdquo; expression. This intuition is captured in the  definition of the &ldquo;With&rdquo; case class below, which extends our previous  language.</p>
+<p>We study this WAE language to better understand what names mean in  programming languages, and how they can be implemented.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>sealed abstract class Exp 
+case class Num(n: Int) extends Exp
+case class Add(lhs: Exp, rhs: Exp) extends Exp
+case class Mul(lhs: Exp, rhs: Exp) extends Exp
+case class Id(x: Symbol) extends Exp 
+case class With(x: Symbol, xdef: Exp, body: Exp) extends Exp
+ 
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <p>We use implicits again to make example programs less verbose.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>implicit def num2exp(n: Int) = Num(n)
+implicit def sym2exp(x: Symbol) = Id(x)
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>A first example program in WAE.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val test = With('x, 5, Add('x,'x))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>Note that we deal with <em>two</em> languages here:</p>
+<ol>
+<li>This Scala file with Scala code.</li>
+<li>Most of the functions work on programs written in the WAE language.</li>
+</ol>
+<p>Most of the time, we concentrate on WAE, but sometimes, we also talk about Scala.</p>
+<p>We have not defined a concrete syntax for WAE, but it is a real language nevertheless. We sometimes use some made-up syntax for examples on the blackboard or in comments.</p>
+<h2>Substitution</h2>
+<p>Instead of dealing with identifiers as external entities as in AE, identifiers can now be defined within the language. This justifies a new treatment of identifiers. We will explain them in terms of <em>substitution</em>, a notion well-known informally from Gymnasium algebra.</p>
+<p>The idea is the following: The interpreter transforms the term</p>
+<pre><code> with (x = 5) {
+     x + x
+ }
+</code></pre>
+<p>into</p>
+<pre><code>5 + 5
+</code></pre>
+<p>before proceeding. That is, all occurrences of <code>x</code> have been replaced by <code>5</code>.</p>
+<p>Note that these two programs &ndash; before and after the substitution &ndash; are certainly not <em>equal</em>: They look quite different. However, they are <em>equivalent</em> in the sense that when evaluated, they will produce the same number. Such transformations between different but somehow equivalent programs are an important tool for the study of programs, and of programming languages. Often, if we know which programs behave identically, we understand better how programs behave in general. We will see more examples of this in this lecture.</p>
+<p>Hence, the implementation of the &ldquo;With&rdquo; case of our interpreter should be something like:</p>
+<pre><code> case With(x, xdef, body) =&gt; eval(subst(body,x,Num(eval(xdef))))
+</code></pre>
+<p>for a function subst with signature</p>
+<pre><code> subst: (Exp,Symbol,Num) =&gt; Exp
+</code></pre>
+<p>The type of the third parameter is &ldquo;Num&rdquo; instead of &ldquo;Exp&rdquo; because it is more difficult to get substitution correct when arbitrary expressions can be inserted (accidential name capture problem, more about that later).</p>
+<p>Since we want to experiment with different versions of substitution, we write the interpreter in such a way that we can parameterize it with a substitution function:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def makeEval(subst: (Exp,Symbol,Num)=&gt;Exp) : Exp=&gt;Int = {
+  def eval(e: Exp) : Int = e match {
+    case Num(n) =&gt; n
+    case Id(x) =&gt; sys.error(&quot;unbound variable: &quot; + x.name)
+    case Add(l,r) =&gt; eval(l) + eval(r)
+    case Mul(l,r) =&gt; eval(l) * eval(r)
+    case With(x, xdef, body) =&gt; eval(subst(body,x,Num(eval(xdef)))) // take the int and wrap it into a Num
+  }
+  eval
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
+                </div>
+                <p>Substitution, take 1: To substitute identiﬁer i in e with expression v, replace all identiﬁers in e that have the name i with the expression v</p>
+<p>Let's try to formalize this definition:</p>
+<pre><code>val subst1 : (Exp,Symbol,Num) =&gt; Exp = (e,i,v) =&gt; e match {
+  case Num(n) =&gt; e
+  case Id(x) =&gt; if (x == i) v else e
+  case Add(l,r) =&gt; Add( subst1(l,i,v), subst1(r,i,v))
+  case Mul(l,r) =&gt; Mul( subst1(l,i,v), subst1(r,i,v))
+  case With(x,xdef,body) =&gt; With( if (x ==i) v else x,
+                                subst1(xdef,i,v),
+                                subst1(body,i,v))
+}
+</code></pre>
+<p>Unfortunately this does not even type-check! And rightly so, because it might otherwise turn reasonable programs into programs that are not even syntactically legal anymore.</p>
+<p>Exercise for self-study: Find an expression that would be transformed into one that is not syntactically legal.</p>
+<p>To see the reason for this, we need to define some terminology (the word &ldquo;instance&rdquo; here means &ldquo;occurence&rdquo;):</p>
+<p><em>Deﬁnition(Binding Instance)</em>: A binding instance of an identiﬁer is the instance of the identiﬁer that gives it its value. In WAE , the <code>x</code> position of a <code>with</code> is the only binding instance.</p>
+<p><em>Deﬁnition (Scope)</em>: The scope of a binding instance is the region of program text in which instances of the identiﬁer refer to the value bound by the binding instance.</p>
+<p><em>Deﬁnition (Bound Instance)</em>: An identiﬁer is bound if it is contained within the scope of a binding instance of its name.</p>
+<p><em>Deﬁnition (Free Instance)</em>: An identiﬁer not contained in the scope of any binding instance of its name is said to be free.</p>
+<p>Examples: In WAE, the symbol in <code>Id('x)</code> is a bound or free instance, and the symbol in <code>With('x, ..., ...)</code> is a binding instance. The scope of this binding instance is the third sub-term of <code>With</code>.</p>
+<p>Now the reason can be revealed.  Our first attempt failed because we substitue the identifier occurs in the binding position in the with-expression.  This renders the expression illegal because after substitution the binding position where an identifier was expected is now occupied by a Num.</p>
+<p>To correct this mistake, we make another take at substitution:</p>
+<p><em>Deﬁnition (Substitution, take 2)</em>: To substitute identiﬁer i in e with expression v, replace all identiﬁers in e which are not binding instances that have the name i with the expression v.</p>
+<p>Here is the formalization of this definition.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val subst2 : (Exp,Symbol,Num) =&gt; Exp = (e,i,v) =&gt; e match {
+    case Num(n) =&gt; e
+    
+    // Bound or free instance =&gt; substitute if names match
+    case Id(x) =&gt; if (x == i) v else e
+    
+    case Add(l,r) =&gt; Add( subst2(l,i,v), subst2(r,i,v))
+    case Mul(l,r) =&gt; Mul( subst2(l,i,v), subst2(r,i,v))
+    
+    // binding instance =&gt; do not substitute
+    case With(x,xdef,body) =&gt; With( x,
+                                    subst2(xdef,i,v),
+                                    subst2(body,i,v))
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_5">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_5">&#182;</a>
+                </div>
+                <p>Let's create an interpreter that uses this substitution function.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def eval2 = makeEval(subst2)
+
+assert(eval2(test) == 10) // it works!
+
+val test2 = With('x, 5, Add('x, With('x, 3,10))) // another test
+
+assert(eval2(test2) == 15) // works as expected
+
+val test3 = With('x, 5, Add('x, With('x, 3,'x))) // another test
+
+// assert(eval2(test3) == 8) // Bang! Result is 10 instead!
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_6">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_6">&#182;</a>
+                </div>
+                <p>What went wrong here? Our substitution algorithm respected binding instances, but not their scope. In the sample expression, the with introduces a new scope for the inner x . The scope of the outer x is shadowed or masked by the inner binding. Because substitution doesn’t recognize this possibility, it incorrectly substitutes the inner x .</p>
+<p><em>Deﬁnition (Substitution, take 3)</em>: To substitute identiﬁer i in e with expression v, replace all non-binding identiﬁers in e having the name i with the expression v, unless the identiﬁer is in a scope different from that introduced by i.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val subst3 : (Exp,Symbol,Num) =&gt; Exp = (e,i,v) =&gt; e match {
+    case Num(n) =&gt; e
+    case Id(x) =&gt; if (x == i) v else e
+    case Add(l,r) =&gt; Add( subst3(l,i,v), subst3(r,i,v))
+    case Mul(l,r) =&gt; Mul( subst3(l,i,v), subst3(r,i,v))
+    case With(x,xdef,body) =&gt; With( x,
+                                    subst3(xdef,i,v),
+                                    // what if we forget to substitute into the body?
+                                    body)
+}
+
+def eval3 = makeEval(subst3)
+
+assert(eval3(test) == 10)
+
+assert(eval3(test2) == 15)
+
+val test3 = With('x, 5, Add('x, With('x, 3,'x)))
+
+assert(eval3(test3) == 8) // Success!
+
+val test4 = With('x, 5, Add('x, With('y, 3,'x)))
+
+// assert(eval3(test4) == 10) // Bang! unbound variable: 'x
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_7">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_7">&#182;</a>
+                </div>
+                <p>The inner expression should result in an error, because x has no value. Once again, substitution has changed a correct program into an incorrect one!</p>
+<p>Let’s understand what went wrong. Why didn’t we substitute the inner x ? Substitution halts at the with because, by deﬁnition, every with introduces a new scope, which we said should delimit substitution. But this with contains an instance of x, which we very much want substituted! So which is it — substitute within nested scopes or not? Actually, the two examples above should reveal that our latest deﬁnition for substitution, which may have seemed sensible at ﬁrst blush, is too draconian: it rules out substitution within any nested scopes.</p>
+<p><em>Deﬁnition (Substitution, take 4)</em>: To substitute identiﬁer i in e with expression v, replace all non-binding identiﬁers in e having the name i with the expression v, except within nested scopes of i.</p>
+<p>Finally, we have a version of substitution that works. A different, more succint way of phrasing this deﬁnition is</p>
+<p><em>Deﬁnition Substitution, take 5)</em>: To substitute identiﬁer i in e with expression v, replace all free instances of i in e with v.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val subst4 : (Exp,Symbol,Num) =&gt; Exp = (e,i,v) =&gt; e match {
+    case Num(n) =&gt; e
+    case Id(x) =&gt; if (x == i) v else e
+    case Add(l,r) =&gt; Add( subst4(l,i,v), subst4(r,i,v))
+    case Mul(l,r) =&gt; Mul( subst4(l,i,v), subst4(r,i,v))
+    // do not substitute when shadowed
+    case With(x,xdef,body) =&gt; if (x == i) e 
+                                 else With(x,
+                                           subst4(xdef,i,v),
+                                           subst4(body,i,v))
+}
+ 
+def eval4 = makeEval(subst4)
+
+assert(eval4(test) == 10)
+
+assert(eval4(test2) == 15)
+
+assert(eval4(test3) == 8) 
+
+assert(eval4(test4) == 10) // Success!
+
+val test5 = With('x, 5, With('x, 'x, 'x))
+
+// assert(eval4(test5) == 5) // Bang! unbound variable 'x
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_8">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_8">&#182;</a>
+                </div>
+                <p>This program should evaluate to 5, but it too halts with an error. This is because we prematurely stopped substituting for x occuring in a bound position. We should substitute in the named expression of a with even if the with in question deﬁnes a new scope for the identiﬁer being substituted, because its named expression is still in the scope of the enclosing binding of the identiﬁer.  We ﬁnally get a valid programmatic deﬁnition of substitution (relative to the language we have so far):</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val subst5 : (Exp,Symbol,Num) =&gt; Exp = (e,i,v) =&gt; e match {
+    case Num(n) =&gt; e
+    case Id(x) =&gt; if (x == i) v else e
+    case Add(l,r) =&gt; Add( subst5(l,i,v), subst5(r,i,v))
+    case Mul(l,r) =&gt; Mul( subst5(l,i,v), subst5(r,i,v))
+    // handle shadowing correctly
+    case With(x,xdef,body) =&gt; With(x,
+                                   subst5(xdef,i,v),
+                                   if (x == i) body else subst5(body,i,v))
+}
+ 
+def eval5 = makeEval(subst5)
+
+assert(eval5(test) == 10)
+
+assert(eval5(test2) == 15)
+
+assert(eval5(test3) == 8) 
+
+assert(eval5(test4) == 10) 
+
+assert(eval5(test5) == 5) // Success!
+
+ 
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_9">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_9">&#182;</a>
+                </div>
+                <h2>Summary</h2>
+<ol>
+<li>Substitution can be used to understand the meaning of names in programming languages.</li>
+<li>Correct implementations of substitution need to handle free, bound, and binding instances of names and their scopes correctly.</li>
+</ol>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
+            </td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

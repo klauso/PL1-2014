@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>02-desugaring.scala</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+        /*--------------------- Layout and Typography ----------------------------*/
+        body {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+            font-size: 15px;
+            line-height: 22px;
+            color: #252519;
+            margin: 0; padding: 0;
+        }
+        a {
+            color: #261a3b;
+        }
+        a:visited {
+            color: #261a3b;
+        }
+        p {
+            margin: 0 0 15px 0;
+        }
+        h4, h5, h6 {
+            color: #333;
+            padding: 6px 0 6px 0;
+            font-size: 13px;
+        }
+        h2, h3 {
+            padding-bottom: 15px;
+            color: #000;
+            overflow: hidden;
+        }
+        h1 {
+            /*padding-top: 40px;*/
+            padding-bottom: 15px;
+            color: #000;
+        }
+        #container {
+            position: relative;
+        }
+        /*#background {
+            position: fixed;
+            top: 0; left: 525px; right: 0; bottom: 0;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+            z-index: -1;
+        }*/
+        #jump_to, #jump_page {
+            background: white;
+            -webkit-box-shadow: 0 0 25px #777; -moz-box-shadow: 0 0 25px #777;
+            -webkit-border-bottom-left-radius: 5px; -moz-border-radius-bottomleft: 5px;
+            font: 10px Arial;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: right;
+        }
+        #jump_to, #jump_wrapper {
+            position: fixed;
+            right: 0; top: 0;
+            padding: 5px 10px;
+        }
+        #jump_wrapper {
+            padding: 0;
+            display: none;
+        }
+        #jump_to:hover #jump_wrapper {
+            display: block;
+        }
+        #jump_page {
+            padding: 5px 0 3px;
+            margin: 0 0 25px 25px;
+        }
+        #jump_page .source {
+            display: block;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-top: 1px solid #eee;
+        }
+        #jump_page .source:hover {
+            background: #f5f5ff;
+        }
+        #jump_page .source:first-child {
+        }
+        table td {
+            border: 0;
+            outline: 0;
+        }
+        td.docs, th.docs {
+            max-width: 450px;
+            min-width: 450px;
+            min-height: 5px;
+            padding: 10px 25px 1px 50px;
+            overflow-x: hidden;
+            vertical-align: top;
+            text-align: left;
+        }
+        .docs pre {
+            margin: 15px 0 15px;
+            padding-left: 15px;
+        }
+        .docs p tt, .docs p code, .doc code {
+            background: #f8f8ff;
+            border: 1px solid #dedede;
+            font-size: 12px;
+            padding: 0 0.2em;
+        }
+        .pilwrap {
+            position: relative;
+        }
+        .pilcrow {
+            font: 12px Arial;
+            text-decoration: none;
+            color: #454545;
+            position: absolute;
+            top: 3px; left: -20px;
+            padding: 1px 2px;
+            opacity: 0;
+            -webkit-transition: opacity 0.2s linear;
+        }
+        td.docs:hover .pilcrow {
+            opacity: 1;
+        }
+        td.code, th.code {
+            padding: 10px 10px 10px 50px;
+            width: 100%;
+            vertical-align: top;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+        }
+        pre, tt, code {
+            font-size: 12px; line-height: 18px;
+            font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+            margin: 0; padding: 0;
+        }
+
+        /*---------------------- Prettify Syntax Highlighting -----------------------------*/
+        .str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}
+
+        table.doc { margin-bottom: 20px; }
+        td.doc { border-bottom: 1px dashed #708090; }
+        td.param { font-weight: bold; }
+        td.return { font-weight: bold; text-decoration: underline; }
+    </style>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
+    <script src="https://google-code-prettify.googlecode.com/svn/trunk/src/lang-scala.js" type="text/javascript"></script>
+</head>
+
+<body onload="prettyPrint()">
+<div id="container">
+    <div id="background"></div>
+    <div id="jump_to">
+        Jump To &hellip;
+        <div id="jump_wrapper">
+            <div id="jump_page">
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/01-intro.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/01-intro.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/03-ae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/03-ae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/04-wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/04-wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/06-fae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/06-fae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html
+                </a>
+                
+            </div>
+        </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th class="docs">
+                <h1>02-desugaring.scala</h1>
+            </th>
+            <th class="code"></th>
+        </tr>
+        </thead>
+        <tbody>
+        
+        <tr id="section_0">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_0">&#182;</a>
+                </div>
+                <h1>Desugaring</h1>
+<p>In the exercises you have already seen the basic structure of an interpreter by means of an interpreter for a language of arithmetic Exps:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object AE {
+  // Abstract Syntax Tree
+  sealed trait Exp // we use &quot;sealed&quot; to get completeness checks for pattern matching
+  case class Num(n: Int) extends Exp
+  case class Add(lhs: Exp, rhs: Exp) extends Exp
+
+  // Example
+  val ex = Add(Num(1), Add(Num(5), Num(3)))
+
+  // Interpreter
+  def eval(e: Exp): Int =
+    e match {
+      case Num(n) =&gt; n
+      case Add(lhs, rhs) =&gt;
+        eval(lhs) + eval(rhs)
+    }
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <p>In this lecture we want to study the technique of desugaring as a means to structure programming languages and decompose a language into a core language and syntactic sugar.</p>
+<p>For illustration, consider the following proposed extensions to the language:</p>
+<ol>
+<li>Mult</li>
+<li>Sub</li>
+<li>Unary Negation</li>
+</ol>
+<p>Extension number 1 is a good example for a core language extension. We have no way of expressing mult in terms of the existing constructs (if we had some looping construct we could express mult as repeated Add but we do not have loops).</p>
+<p>Hence we add this language construct to the (core) language:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object MAE {
+  // Abstract Syntax Tree
+  sealed trait Exp
+  case class Num(n: Int) extends Exp
+  case class Add(lhs: Exp, rhs: Exp) extends Exp
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
+  // Example
+  val ex = Add(Num(1), Mult(Num(5), Num(3)))
+
+  // Interpreter
+  def eval(e: Exp): Int =
+    e match {
+      case Num(n) =&gt; n
+      case Add(lhs, rhs) =&gt; eval(lhs) + eval(rhs)
+      case Mult(lhs, rhs) =&gt;  eval(lhs) * eval(rhs)
+    }
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>Let us now consider extension #2, sub. One way to support sub is to add it to the core language, just like mult:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object SMAE {
+  // Abstract Syntax Tree
+  sealed trait Exp
+  case class Num(n: Int) extends Exp
+  case class Add(lhs: Exp, rhs: Exp) extends Exp
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
+  case class Sub(lhs: Exp, rhs: Exp) extends Exp
+  // Example
+  val ex = Sub(Num(1), Mult(Num(5), Num(3)))
+
+  // Interpreter
+  def eval(e: Exp): Int =
+    e match {
+      case Num(n) =&gt; n
+      case Add(lhs, rhs) =&gt; eval(lhs) + eval(rhs)
+      case Mult(lhs, rhs) =&gt;  eval(lhs) * eval(rhs)
+      case Sub(lhs, rhs) =&gt;  eval(lhs) - eval(rhs)
+    }
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>However, another way of adding sub is to treat it as syntactic sugar using the fact that <code>a - b = a + (-1 * b)</code></p>
+<p>One way of expressing the desugaring is as a syntax transformation:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def desugarSMAE2MAE(e: SMAE.Exp) : MAE.Exp = e match {
+  case SMAE.Num(n) =&gt; MAE.Num(n)
+  case SMAE.Add(lhs, rhs) =&gt; MAE.Add(desugarSMAE2MAE(lhs), desugarSMAE2MAE(rhs))
+  case SMAE.Mult(lhs, rhs) =&gt; MAE.Mult(desugarSMAE2MAE(lhs), desugarSMAE2MAE(rhs)) 
+  case SMAE.Sub(lhs, rhs) =&gt; 
+    MAE.Add(desugarSMAE2MAE(lhs), 
+                 MAE.Mult(MAE.Num(-1),desugarSMAE2MAE(rhs)))
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
+                </div>
+                <p>With this desugaring in place, we do not need an interpreter for SMAE anymore; rather we can reuse the MAE interpreter:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val res = MAE.eval(desugarSMAE2MAE(SMAE.ex))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_5">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_5">&#182;</a>
+                </div>
+                <p>If we had written other algorithms on MAE, or had proven properties of MAE, they'd be applicable to SMAE, too. Hence desugaring is a way of reusing code, proofs, &hellip; . It is important, though, that the desugared language feature is gone after desugaring. For instance, a pretty printer would print the desugared code. A debugger would use the desugared code. This can be an important downside to desugaring. There are ways to avoid or mitigate these shortcomings, but they require Addal work.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object SMAE2 {
+  // Abstract Syntax Tree
+  sealed trait Exp
+  case class Num(n: Int) extends Exp
+  case class Add(lhs: Exp, rhs: Exp) extends Exp
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
+  def sub(e1: Exp, e2: Exp) : Exp =
+    Add(e1, Mult(Num(-1), e2))
+  
+  // Compared to SMAE, we only have to change upper case Sub by lower case sub
+  // when constructing examples.
+  val ex = sub(Num(1), Mult(Num(5), Num(3)))
+
+  // Interpreter - no case for sub needed
+  def eval(e: Exp): Int =
+    e match {
+      case Num(n) =&gt; n
+      case Add(lhs, rhs) =&gt; eval(lhs) + eval(rhs)
+      case Mult(lhs, rhs) =&gt;  eval(lhs) * eval(rhs)
+    }
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_6">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_6">&#182;</a>
+                </div>
+                <p>Let us now consider the third extension, unary minus. Here we have three choices:
+<br  />i) Add unary minus to the core language
+<br  />ii) Treat unary minus as syntactic sugar for the core language using  <code>-x = (-1)*x</code>
+<br  />iii) Treat unary minus as syntactic sugar on top of the syntactic sugar using <code>-x = 0 - x</code>.</p>
+<p>We will use the third option to illustrate that one can build layers of syntactic sugar:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object USMAE {
+  // Abstract Syntax Tree
+  sealed trait Exp
+  case class Num(n: Int) extends Exp
+  case class Add(lhs: Exp, rhs: Exp) extends Exp
+  case class Mult(lhs: Exp, rhs: Exp) extends Exp
+  def sub(e1: Exp, e2: Exp) : Exp =
+    Add(e1, Mult(Num(-1), e2))
+  def unaryminus(e: Exp) = sub(Num(0), e)
+  
+  // Compared to SMAE, we only have to change upper case Sub by lower case sub
+  // when constructing examples.
+  val ex = sub(unaryminus(Num(1)), Mult(Num(5), Num(3)))
+
+  // Interpreter - no case for sub needed
+  def eval(e: Exp): Int =
+    e match {
+      case Num(n) =&gt; n
+      case Add(lhs, rhs) =&gt; eval(lhs) + eval(rhs)
+      case Mult(lhs, rhs) =&gt;  eval(lhs) * eval(rhs)
+    }
+}
+</code></pre>
+            </td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
