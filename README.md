@@ -14,13 +14,13 @@ Schedule
  * October 27. Lecture
  * October 28. Lecture
  * October 30. Exercise: [Pattern matching & alternatives](exercises/02-pattern-matching.scala)
- * November 3. Exercise
+ * November 3. Exercise: Primitives vs. Syntactic Sugar
  * November 4. Lecture
  * November 6. Lecture
- * November 10. Exercise
+ * November 10. Exercise: First-class, Second-class, First-order, Second-order, Higher-order, ...
  * November 11. Lecture
  * November 13. Lecture
- * ...
+ * November 17. Exercise: Pretty Printing, [Closures in Java](exercises/Closures.java)
 
 Homework
 --------
