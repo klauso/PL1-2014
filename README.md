@@ -31,3 +31,5 @@ You have to hand in reasonable homework for all but one assignment to attend the
    assignments at the end of [exercises/01-scala-basics.scala](exercises/01-scala-basics.scala).
  * Hand in before Friday evening, November 14:  
    assignment at the end of [exercises/02-pattern-matching.scala](exercises/02-pattern-matching.scala).
+ * Hand in before Monday morning, November 24:
+   assignment at the end of [exercises/05-pretty.scala](exercises/05-pretty.scala).
