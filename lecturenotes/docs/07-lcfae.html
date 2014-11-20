@@ -202,47 +202,18 @@
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_0">&#182;</a>
                 </div>
-                
+                <h1>Lazy Evaluation</h1>
+<h2>Motivation for Lazy Evaluation</h2>
+<p>read &ldquo;Why Functional Programming Matters&rdquo; by John Hughes available at http://www.cse.chalmers.se/~rjmh/Papers/whyfp.html</p>
+<h2>What lazy evaluation means</h2>
+<p>The choice of evaluation strategy is a purely semantic change that requires no change to the syntax.
+<br  />For this reason we reuse the syntactic definitions of FAE, hence <code>:load 5-fae.scala</code> before executing this script or uncomment the previous line.</p>
+<p>Before we discuss lazy evaluation, we will first discuss a related evaluation strategy, call-by-name.</p>
+<p>Call-by-name can be explained very succintly in the substitution-based interpreter: Instead of evaluating the argument &ldquo;a&rdquo; in the &ldquo;App&rdquo; case before substitution, we substitute the unevaluated argument into the body. The rest remains exactly the same.</p>
+
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>/*
-These are lecture notes for the &quot;Programming Languages I&quot; course by Klaus Ostermann 
-at the University of Tübingen.
-
-loosely based on Sec. 6 of &quot;Programming Languages: Application and Interpretation&quot; by
-Shriram Krishnamurthi
-
-Please comment/correct/improve these notes via github. Proposals or questions can
-be submitted as an &quot;issue&quot;; proposals for corrections/extensions/improvements can
-
-/* Lazy Evaluation
- * ===============
- *
- * Motivation for Lazy Evaluation
- * ------------------------------
- * read Chap. 7 of PLAI and get acquainted with basic Haskell
- * (install GHC from www.haskell.org and browse through one of the tutorials)
- *
- * read &quot;Why Functional Programming Matters&quot; by John Hughes
- * available at http://www.cse.chalmers.se/~rjmh/Papers/whyfp.html
- *  
- * What lazy evaluation means
- * --------------------------
- * The choice of evaluation strategy is a purely semantic change that requires
- * no change to the syntax.
- * For this reason we reuse the syntactic definitions of FAE, hence
-:load 5-fae.scala
- * before executing this script or uncomment the previous line.
- *
- * Before we discuss lazy evaluation, we will first discuss a a
- * related evaluation strategy, call-by-name.
- *
- * Call-by-name can be explained very succintly in the substitution-based
- * interpreter: Instead of evaluating the argument &quot;a&quot; in the &quot;App&quot; case
- * before substitution, we substitute the unevaluated argument into the body.
- * The rest remains exactly the same. */
-
-def evalcbn(e: Exp) : Exp = e match {
+                <pre><code class='prettyprint lang-scala'>def evalcbn(e: Exp) : Exp = e match {
   case Id(v) =&gt; sys.error(&quot;unbound identifier: &quot; + v.name)
   case Add(l,r) =&gt; (evalcbn(l), evalcbn(r)) match {
                      case (Num(x),Num(y)) =&gt; Num(x+y)
@@ -255,114 +226,218 @@ def evalcbn(e: Exp) : Exp = e match {
   case _ =&gt; e 
 }
 
-/* Does this change the semantics, or is it just an implementation detail?
- * In other words, is eval(e) == evalcbn(e) for all e ?
- * Let's try two former test cases.
- 
-assert( evalcbn(test) == eval(test))
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <p>Does this change the semantics, or is it just an implementation detail? In other words, is <code>eval(e) == evalcbn(e)</code> for all <code>e</code> ? Let's try two former test cases.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>assert( evalcbn(test) == eval(test))
 assert(evalcbn(test2) == eval(test2))
 
-/* One can formally prove that if eval and evalcbn both produce a number 
- * then the numbers are equal. Do they also agree if they produce a function?
- *
- * Not necessarily. Consider: */
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>One can formally prove that if eval and evalcbn both produce a number then the numbers are equal. Do they also agree if they produce a function?</p>
+<p>Not necessarily. Consider:</p>
 
-val test3 = App(Fun('f,Fun('x,App('f,'x))),Add(1,2)) 
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val test3 = App(Fun('f,Fun('x,App('f,'x))),Add(1,2)) 
 
 assert(eval(test3) == Fun('x,App(Num(3),Id('x))))
 assert(evalcbn(test3) == Fun('x,App(Add(Num(1),Num(2)),Id('x))))
 
-/* However, if both produce a function, then the functions &quot;behave&quot; the same. 
- * More specifically, the function bodies produced by evalcbn may be 
- * &quot;more evaluated&quot; than those produced by eval. If we would evaluate within
- * function bodies (also called evaluation &quot;under a lambda&quot;) - which our interpreters
- * do not do - we could produce the expression returned from eval from the expression
- * returned by evalcbn. This kind of equivalence is also called &quot;beta-equivalence&quot;.
- *
- * Most importantly, however, eval and evalcbn differ with regard to their termination
- * behavior. We have seen that omega is a diverging expression. In eval, the term */
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>However, if both produce a function, then the functions &ldquo;behave&rdquo; the same. More specifically, the function bodies produced by evalcbn may be  &ldquo;more evaluated&rdquo; than those produced by eval. If we would evaluate within function bodies (also called evaluation &ldquo;under a lambda&rdquo;) - which our interpreters do not do - we could produce the expression returned from eval from the expression returned by evalcbn. This kind of equivalence is also called &ldquo;beta-equivalence&rdquo;.</p>
+<p>Most importantly, however, eval and evalcbn differ with regard to their termination behavior. We have seen that omega is a diverging expression. In eval, the term</p>
 
- val test4 = App(Fun('x,5),omega)
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'> val test4 = App(Fun('x,5),omega)
 
-/* is hence also diverging. In contrast: */
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
+                </div>
+                <p>is hence also diverging. In contrast:</p>
 
-assert(evalcbn(test4) == Num(5))
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>assert(evalcbn(test4) == Num(5))
 
-/* Extra material: Infinite lists in FAE (not relevant for exam) 
- * ------------------------------------------------------
- * Using our call-by-name interpreter, we can express the same kinds of programming
- * patterns that we have tried in Haskell, such as infinite lists.
- *
- * We do not have direct support for lists, but luckily we already know
- * how to Church-encode them (see also lab-01.scala). Church-encoding can also
- * be done in FAE. Here is the one for lists: */
-val nil = Fun('c, Fun('e, 'e))
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_5">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_5">&#182;</a>
+                </div>
+                <h2>Extra material: Infinite lists in FAE (not relevant for exam)</h2>
+<p>Using our call-by-name interpreter, we can express the same kinds of programming patterns that we have tried in Haskell, such as infinite lists.</p>
+<p>We do not have direct support for lists, but we can encode lists. This kind of encoding is called <em>Church encoding</em>.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val nil = Fun('c, Fun('e, 'e))
 val cons  = Fun('x, Fun('xs, Fun('c, Fun('e, App(App('c, 'x), App(App('xs, 'c),'e))))))
 /* For instance, the list 1,2,3 is encoded as: */
 val list123 = App(App('cons,1),App(App('cons,2),App(App('cons,3), 'nil)))
 /* The map function on lists becomes :*/
 val maplist = Fun('f, Fun('l, App(App('l, Fun('x, Fun('xs, App(App('cons, App('f,'x)),'xs)))), 'nil)))
-/* For instance, we can map the successor function over the 1,2,3 list. */
-val test5 = wth('cons,cons, 
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_6">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_6">&#182;</a>
+                </div>
+                <p>For instance, we can map the successor function over the 1,2,3 list.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val test5 = wth('cons,cons, 
             wth('nil, nil, 
             wth('maplist, maplist,
             App(App('maplist, Fun('x, Add('x,1))), list123))))
-/* Since it is somewhat difficult to print out the resulting list in our primitive language
-val test5res = wth('cons,cons, 
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_7">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_7">&#182;</a>
+                </div>
+                <p>Since it is somewhat difficult to print out the resulting list in our primitive language we construct the result we expect explicitly.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val test5res = wth('cons,cons, 
                wth('nil, nil, 
                  App(App('cons,2),App(App('cons,3),App(App('cons,4), 'nil)))))
 assert(eval(test5) == eval(test5res))     
-/* Using evalcbn instead of eval the assertion does not hold (why?), but the results are beta-equivalent. */           
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_8">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_8">&#182;</a>
+                </div>
+                <p>Using evalcbn instead of eval the assertion does not hold (why?), but the results are beta-equivalent.</p>
+<p>We can also construct infinite lists. To this end, we need some form of recursion. We choose the standard fixed-point operator Y. This operator only works under call-by-name or other so-called &ldquo;non-strict&rdquo; evaluation strategies.</p>
 
-/* We can also construct infinite lists. To this end, we need some form of recursion. We choose 
- * the standard fixed-point operator Y. This operator only works under call-by-name or other 
- * so-called &quot;non-strict&quot; evaluation strategies. */            
-val y = Fun('f, App(Fun('x,App('f, App('x,'x))), Fun('x,App('f,App('x,'x)))))
-/* Using Y, we can construct infinite lists, such as the list of all natural numbers. */ 
-val allnats = App(App('y, Fun('nats, Fun('n, App(App('cons,'n), App('nats, Add('n,1)))))),1)
-/* We can also perform standard computations on infinite lists, such as mapping the successor function over it. */
-val list2toinfty = wth('cons,cons, 
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val y = Fun('f, App(Fun('x,App('f, App('x,'x))), Fun('x,App('f,App('x,'x)))))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_9">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_9">&#182;</a>
+                </div>
+                <p>Using Y, we can construct infinite lists, such as the list of all natural numbers.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val allnats = App(App('y, Fun('nats, Fun('n, App(App('cons,'n), App('nats, Add('n,1)))))),1)
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_10">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_10">&#182;</a>
+                </div>
+                <p>We can also perform standard computations on infinite lists, such as mapping the successor function over it.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val list2toinfty = wth('cons,cons, 
                    wth('nil, nil, 
                    wth('y, y, 
                    wth('maplist, maplist,
                       App(App('maplist, Fun('x, Add('x,1))), allnats)))))
-/* Of course, list2toinfty diverges when we use eval, but it works fine with evalcbn. It is hard to verify the result
- * due to an almost unreadable output. Hence we propose the following 
- *
- * Exercise: Extend the language such that you can implement the &quot;take&quot; function as known from Haskell within 
- *           the language  (if0-expressions or something like it are needed for that)
- *           Now add a &quot;print&quot; function that prints a number on the console. Use it to display the first 
- *           3 list elements of test2toinfty are 2,3,4. 
- *
- * -- end of extra material --
- 
-/* Let us now consider the question how we can implement call-by-name in the environment-based interpreter.
- * Translating the idea of not evaluating the function argument to the environment-based version seems to 
- * suggest that the environment should map identifiers to expression instead of values.
- *
- * However, we run into the same problems that we had with first-class functions before we introduced closures:
- * What happens to the deferred substitutions that still have to be applied in the function argument? If
- * we discard the environment in which the function argument was defined we again introduce a variant of
- * dynamic scoping.
- *
- * Hence, like for closures, we need to store the environment together with the expression. We call such a 
- * pair a _thunk_. An environment hence becomes a mapping from symbols to thunks. Note that environments
- * and thunks are hence mutually recursive. In Scala, we can hence not use type definitions of the form
- *
- * type Thunk = (Exp, Env)
- * type Env = Map[Symbol, Thunk]
- *
- * Instead, we use a Scala class Env to express this recursion.
- *
- * Since we want to experiment with different variants of how to generate and evaluate thunks we first
- * create a parameterizable variant of the evaluator that leaves open how to 
- * i)represent thunks (type Thunk)
- * ii) create thunks (method delay)
- * iii) evaluate thunks (method force).
- *
- * Hint: Research on the internet what abstract type members in Scala are.
- *       For instance, here: http://www.scala-lang.org/node/105
-trait CBN {
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_11">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_11">&#182;</a>
+                </div>
+                <p>Of course, <code>list2toinfty</code> diverges when we use <code>eval</code>, but it works fine with <code>evalcbn</code>. It is hard to verify the result due to an almost unreadable output. Hence we propose the following</p>
+<p>Exercise: Extend the language such that you can implement the &ldquo;take&rdquo; function as known from Haskell within the language  (if0-expressions or something like it are needed for that). Now add a &ldquo;print&rdquo; function that prints a number on the console. Use it to display the first 3 list elements of test2toinfty are 2,3,4.</p>
+<p>&ndash; end of extra material &ndash;</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_12">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_12">&#182;</a>
+                </div>
+                <h2>Environment-based lazy evaluation</h2>
+<p>Let us now consider the question how we can implement call-by-name in the environment-based interpreter. Translating the idea of not evaluating the function argument to the environment-based version seems to  suggest that the environment should map identifiers to expression instead of values.</p>
+<p>However, we run into the same problems that we had with first-class functions before we introduced closures: What happens to the deferred substitutions that still have to be applied in the function argument? If we discard the environment in which the function argument was defined we again introduce a variant of dynamic scoping.</p>
+<p>Hence, like for closures, we need to store the environment together with the expression. We call such a  pair a <em>thunk</em>. An environment hence becomes a mapping from symbols to thunks. Note that environments and thunks are hence mutually recursive. In Scala, we can hence not use type definitions of the form</p>
+<p>type Thunk = (Exp, Env)
+<br  />type Env = Map[Symbol, Thunk]</p>
+<p>Instead, we use a Scala class Env to express this recursion.</p>
+<p>Since we want to experiment with different variants of how to generate and evaluate thunks we first create a parameterizable variant of the evaluator that leaves open how to</p>
+<ol>
+<li>represent thunks (type Thunk)</li>
+<li>create thunks (method delay)</li>
+<li>evaluate thunks (method force).</li>
+</ol>
+<p>Hint: Research on the internet what abstract type members in Scala are.  For instance, here: http://www.scala-lang.org/node/105</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>trait CBN {
     type Thunk
     
     case class Env(map: Map[Symbol, Thunk]) {
@@ -395,14 +470,21 @@ trait CBN {
       case f@Fun(x,body) =&gt; ClosureV(f,env)
     }
 }
-/* Let's now create an instance of CBN that corresponds to the substitution-based call-by-name
- * interpreter. A thunk is just a pair of expression and environment. Forcing a thunk just
- * evaluates it in the stored environment.
- *
- * To understand what is going on during evaluation of tests we trace argument evaluation by a 
- * printout to the console.
- 
-object CallByName extends CBN {
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_13">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_13">&#182;</a>
+                </div>
+                <p>Let's now create an instance of CBN that corresponds to the substitution-based call-by-name interpreter. A thunk is just a pair of expression and environment. Forcing a thunk just evaluates it in the stored environment.</p>
+<p>To understand what is going on during evaluation of tests we trace argument evaluation by a  printout to the console.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object CallByName extends CBN {
   type Thunk = (Exp,Env)
   def delay(e: Exp, env: Env) = (e,env)
   def force(t: Thunk) = {
@@ -412,33 +494,58 @@ object CallByName extends CBN {
 }
 
 assert(CallByName.eval(test, CallByName.Env(Map.empty)) == CallByName.NumV(12))
-/* Call-by-need
- * ------------
- * Call-by-name is rather wasteful: If an argument is used n times in the body, the argument
- * expression is re-evaluated n-times. For instance, in */
-val cbntest = wth('double, Fun('x, Add('x,'x)),
-               App('double, Add(2,3)))
-/* the sum of 2 and 3 is computed twice. 
- * If the argument is passed again to another function,
- * this may lead to an exponential blow-up.
- *
- * Example: */
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_14">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_14">&#182;</a>
+                </div>
+                <h2>Call-by-need</h2>
+<p>Call-by-name is rather wasteful: If an argument is used n times in the body, the argument expression is re-evaluated n-times. For instance, in</p>
 
-val blowup  = wth('a, Fun('x, Add('x,'x)),
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val cbntest = wth('double, Fun('x, Add('x,'x)),
+               App('double, Add(2,3)))
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_15">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_15">&#182;</a>
+                </div>
+                <p>the sum of 2 and 3 is computed twice.  If the argument is passed again to another function, this may lead to an exponential blow-up.</p>
+<p>Example:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val blowup  = wth('a, Fun('x, Add('x,'x)),
               wth('b, Fun('x, Add(App('a,'x), App('a,'x))),
               wth('c, Fun('x, Add(App('b,'x), App('b,'x))),
               wth('d, Fun('x, Add(App('c,'x), App('c,'x))),
               wth('e, Fun('x, Add(App('d,'x), App('d,'x))),
               wth('f, Fun('x, Add(App('e,'x), App('e,'x))),
               App('f, Add(2,3))))))))
-/*
- * Can we do better? Yes, by caching the value
- * when the argument expression is evaluated for the first time. This evaluation strategy
- * is called _call-by-need_. 
- *
- * Caching is easy to implement in Scala:
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_16">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_16">&#182;</a>
+                </div>
+                <p>Can we do better? Yes, by caching the value when the argument expression is evaluated for the first time. This evaluation strategy is called <em>call-by-need</em>.</p>
+<p>Caching is easy to implement in Scala:</p>
 
- object CallByNeed extends CBN {
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object CallByNeed extends CBN {
   case class MemoThunk(e: Exp, env: Env) {
     var cache: Value = null
   }
@@ -453,27 +560,26 @@ val blowup  = wth('a, Fun('x, Add('x,'x)),
   }
 }
 
-/* For instance, compare call-by-need and call-by-name in cbntest or blowup. 
- *
- * However, the meta-language (i.e., the subset of Scala features) used in the
- * interpreter has become more complicated: Since we are using mutation, the order
- * of evaluation and aliasing of object references becomes important. Luckily, 
- * call-by-need agrees with call-by-name with regard to produced values and termination
- * behavior, hence it is usually not necessary to reason about programs with the
- * call-by-need semantics. If, however, one wants to reason about the performance
- * of a program in a call-by-need setting, one has to take these additional complications
- * into account. In practice, it is even worse, since languages like Haskell perform
- * additional optimizations that, for instance, switch to call-by-value if an analysis
- * can determine that an argument will definitely be used (lookup &quot;strictness analysis&quot;). 
- 
- Topics for class discussion:
- - Is it a good idea to mix a language with implicit mutation (such as Java, Scala, C++, Python, ...)
-   with lazy evaluation?
- - How can one simulate lazy evaluation in an eager language? 
-   Basic idea: 'Lambda' as evaluation firewall.
- 
-
 </code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_17">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_17">&#182;</a>
+                </div>
+                <p>For instance, compare call-by-need and call-by-name in cbntest or blowup.</p>
+<p>However, the meta-language (i.e., the subset of Scala features) used in the interpreter has become more complicated: Since we are using mutation, the order of evaluation and aliasing of object references becomes important. Luckily,  call-by-need agrees with call-by-name with regard to produced values and termination behavior, hence it is usually not necessary to reason about programs with the* call-by-need semantics. If, however, one wants to reason about the performance of a program in a call-by-need setting, one has to take these additional complications into account. In practice, it is even worse, since languages like Haskell perform additional optimizations that, for instance, switch to call-by-value if an analysis can determine that an argument will definitely be used (lookup &ldquo;strictness analysis&rdquo;).</p>
+<p>Topics for class discussion:</p>
+<ul>
+<li>Is it a good idea to mix a language with implicit mutation (such as Java, Scala, C++, Python, &hellip;) with lazy evaluation?</li>
+<li>How can one simulate lazy evaluation in an eager language? Basic idea: 'Lambda' as evaluation firewall.</li>
+</ul>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
             </td>
         </tr>
         
