@@ -21,6 +21,7 @@ Schedule
  * November 11. Lecture
  * November 13. Lecture
  * November 17. Exercise: Pretty Printing, [Closures in Java](exercises/Closures.java)
+ * November 18 & 20. Lecture: Call-by-name and call-by-need, thunks
 
 Homework
 --------
