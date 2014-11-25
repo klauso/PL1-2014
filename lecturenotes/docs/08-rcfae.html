@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>01-intro.scala</title>
+    <title>08-rcfae.scala</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <style type="text/css">
         /*--------------------- Layout and Typography ----------------------------*/
@@ -198,7 +198,7 @@
         <thead>
         <tr>
             <th class="docs">
-                <h1>01-intro.scala</h1>
+                <h1>08-rcfae.scala</h1>
             </th>
             <th class="code"></th>
         </tr>
@@ -210,54 +210,153 @@
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_0">&#182;</a>
                 </div>
-                <h1>Introduction</h1>
-<p>These are lecture notes for the &ldquo;Programming Languages I&rdquo; course the University of Tübingen.</p>
-<p>loosely based on &ldquo;Programming Languages: Application and Interpretation&rdquo; by Shriram Krishnamurthi</p>
-<p>Please send comments or errors in these notes via email to Klaus Ostermann. My email address can be found on my webpage.</p>
-<h1>Why are you here?</h1>
-<p>This is an advanced programming course that focuses on the design and semantics of programming languages.</p>
-<p>The goals of this course are:</p>
-<ul>
-<li>To change the way you solve problems in programming: By principled design,  with a rich toolbox of abstract concepts, rather than by tinkering.</li>
-<li>Enable you to think beyond the currently fashionable programming languages.</li>
-<li>Enable you to evaluate and discuss programming languages in a principled way.</li>
-<li>To show you where computer languages come from and potential future directions.</li>
-<li>To demonstrate why languages should be regarded as the ultimate form of abstraction.</li>
-<li>To teach you how to recognize abstractions and how to turn them into a language design.</li>
-<li>Teach you different ways how to realize a language design and make it practically useful.</li>
-<li>To convey a sense of aesthetics in programming.</li>
-<li>To introduce you into one of the most beautiful theories in theoretical computer science.</li>
-<li>To turn you into a better programmer!</li>
-</ul>
-<p>Non-goals of this course are:</p>
-<ul>
-<li>Learn X different programming languages. Rather, you'll learn to decompose a PL into its features and discuss the merits of the features independently of the concrete PL.</li>
-<li>Write parsers or implement full-fledged compilers (although we will touch some compiler issues).</li>
-<li>Turn you into an evangelist for a particular PL.</li>
-</ul>
-<h1>How will we get there?</h1>
-<p>We will typically explain language features in two steps. First, we'll give an informal introduction and discuss some examples to get some experience with it. Then we will distill the core of the feature into an executable interpreter. Later, when we have more experience in formalizing language design into interpreters, we will also use formal mathematical notation.</p>
-<p>We will not just present the design of these features as if had disappeared out of the blue sky. Rather, we will discuss the process and trade-offs (and potential mistakes and pitfalls) that led to these designs. We will also discuss how these features appear in various available programming languages.</p>
-<p>We will mainly use the programming language Scala to write interpreters. Scala is sufficiently powerful to allow concise and elegant interpreters; on the other hand, it is sufficiently mature and popular for industrial usage. It also has variants of many of the features we will discuss. The book by Krishnamurthi, on which we loosely base the first part of the course, uses a different language, Racket. You are also welcome to use Racket instead of (or in addition to) Scala. Racket embodies an important tradition of PL design that is worth knowing, hence we encourage you, independently of this course, to study it!</p>
-<h1>How we will study programming languages</h1>
-<p>Rather than use vague labels such as &ldquo;object-oriented&rdquo; or &ldquo;functional&rdquo;, we will decompose languages into small features, similar to how matter can be explained and decomposed into atoms, cells into DNA fragments, or organisms into the biological taxonomy.</p>
-<p>In addition to the decomposition into small-grained features, we will use a conceptual technique called &ldquo;desugaring&rdquo; to distinguish essentional from non-essential language parts and identify the core constructs of a language.</p>
-<h1>Topics for class discussion:</h1>
-<ul>
-<li>How can programming languages be evaluated, classified and compared?</li>
-<li>Why are labels like &ldquo;object-oriented&rdquo;, &ldquo;declarative&rdquo;, or &ldquo;functional&rdquo; too coarse-grained to be useful?</li>
-<li>How can we turn programming language research into a science?</li>
-<li>What would you like to learn in this course? What are your expectations?</li>
-<li>Which programming languages do you know? Which features of these languages do you
-<br  />like or dislike, and why?</li>
-<li>Is the choice of programming language for a programming project significant?</li>
-<li>Are interpreters a good way to capture the meaning of a PL? How do they compare to informal descriptions, formal specifications, and compilers?</li>
-<li>How important is the syntax of a PL?</li>
-</ul>
+                <h1>Recursion</h1>
+<p>Let's try to write a function that computes the sum of the first n integers. Let's pretend we do not know that the sum of the first n integers is n*(n+1)/2 and instead compute the sum in a loop. Let's try to do this in FAE (with if0):</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'></code></pre>
+                <pre><code class='prettyprint lang-scala'>sealed abstract class Exp
+case class Num(n: Int) extends Exp
+case class Id(name: Symbol) extends Exp
+case class Add(lhs: Exp, rhs: Exp) extends Exp
+case class If0(cond: Exp, thenExp: Exp, elseExp: Exp) extends Exp
+implicit def num2exp(n: Int) = Num(n)
+implicit def id2exp(s: Symbol) = Id(s)
+case class Fun(param: Symbol, body: Exp) extends Exp
+case class App (funExpr: Exp, argExpr: Exp) extends Exp
+def wth(x: Symbol, xdef: Exp, body: Exp) : Exp = App(Fun(x,body),xdef)
+
+val sumattempt = wth('sum, Fun('n, If0('n, 0, Add('n, App('sum, Add('n,-1))))), App('sum, 10))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <p>However, sumattempt won't work and yield an unbound identifier error (why?). An alternative would be to use a variant of the y combinator to support recursion properly, but today we want to talk about direct support for recursion. More specifically, we want a language construct &ldquo;letrec&rdquo; that is similar to &ldquo;with&rdquo;,  except that the bound symbol can be used in the expression the symbol is bound to:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>case class Letrec(x: Symbol, e: Exp, body: Exp) extends Exp
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>Using letrec, our example can be expressed as follows.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val sum = Letrec('sum, Fun('n, If0('n, 0, Add('n, App('sum, Add('n,-1))))), App('sum, 10))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>Let's now consider the semantics of letrec. Consider the evaluation of <code>Letrec(x,e,body)</code> in an environment <code>env</code>.</p>
+<p>What environment should we use to evaluate e and body, respectively? Using env for e will produce a <code>ClosureV(Fun('n,...'sum'...),env)</code>, and hence the environment when evaluating body will be <code>envbody = env + (x -&gt; ClosureV(Fun('n,...'sum...),env))</code>. This is bad, because the <code>env</code> in the closure does not contain a binding for <code>'sum</code> and hence the recursive invocation will fail.</p>
+<p>The environment in the closure must contain a mapping for <code>'sum</code>. Hence envbody should look like</p>
+<pre><code>envbody = env + (x -&gt; ClosureV(Fun('n, ...'sum...), 
+                               env+('sum -&gt; ClosureV(Fun('n,...'sum...),env)))
+</code></pre>
+<p>This looks better, but now the second closure contains an environment with no binding of <code>'sum</code>. What we need is an environment that satisfies the equation:</p>
+<pre><code>envbody == env + (x -&gt; ClosureV(Fun('n, ...'sum..), envbody))
+</code></pre>
+<p>Obviously envbody must be circular. There are different ways to create such a circular environment. We will choose mutation to create a circle. More specifically, we introduce a mutable pointer to a value (class ValuePointer) which will be initialized with a null pointer. In the Letrec case, we put such a ValuePointer in the environment and evaluate the (recursive) expression in that environment. Then we update the pointer with the result of evaluating that epxression.</p>
+<p>The only other change we need to make is to dereference a potential value pointer in the Id case. We deal with the necessary case distinction by a polymorphic &ldquo;value&rdquo; method.</p>
+<p>Due to the mutual recursion between ValueHolder and Value the definitions are put into an object.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>object Values {
+  trait ValueHolder {
+    def value : Value
+  }  
+  sealed abstract class Value extends ValueHolder { def value = this }
+  case class ValuePointer(var v: Value) extends ValueHolder { def value = v }
+  case class NumV(n: Int) extends Value
+  case class ClosureV(f: Fun, env: Env) extends Value
+  type Env = Map[Symbol, ValueHolder] 
+}  
+
+import Values._  // such that we do not have to write Values.ValueHolder etc.
+
+ 
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
+                </div>
+                <p>The interpreter is unchanged except for the additional Letrec case and the modified Id case.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def eval(e: Exp, env: Env) : Value = e match {
+  case Num(n: Int) =&gt; NumV(n)
+  case Id(x) =&gt; env(x).value  // dereference potential ValuePointer
+  case If0(cond, thenExp, elseExp) =&gt; eval(cond,env) match {
+    case NumV(0) =&gt; eval(thenExp,env)
+    case _ =&gt; eval(elseExp,env)
+  }    
+  case Add(l,r) =&gt; {
+    (eval(l,env), eval(r,env)) match {
+      case (NumV(v1),NumV(v2)) =&gt; NumV(v1+v2)
+      case _ =&gt; sys.error(&quot;can only add numbers&quot;)
+    }
+  }
+  case f@Fun(param,body) =&gt; ClosureV(f, env)
+  case App(f,a) =&gt; eval(f,env) match {
+    case ClosureV(f,closureEnv) =&gt; eval(f.body, closureEnv + (f.param -&gt; eval(a,env)))
+    case _ =&gt; sys.error(&quot;can only apply functions&quot;)
+  }
+  case Letrec(x,e,body) =&gt; {
+    val vp = ValuePointer(null)  // initialize pointer with null
+    val newenv = env + (x -&gt; vp)  // evaluate e in the environment extended with the placeholder
+	vp.v = eval(e,newenv)         // create the circle in the environment
+    eval(body,newenv) // evaluate body in circular environment
+  }
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_5">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_5">&#182;</a>
+                </div>
+                <p>The sum of numbers from 1 to 10 should be 55.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>assert(eval(sum, Map.empty) == NumV(55))
+
+// These test cases were contributed by rzhxeo (Sebastian Py)
+var func = Fun('n, If0('n, 0, App('func, Add('n, -1))))
+var test1 = Letrec('func, func, App('func, 1))
+var test2 = Letrec('func, App(Fun('notUsed, func), 0), App('func, 1))
+assert(eval(test1, Map()) == NumV(0)) 
+assert(eval(test2, Map()) == NumV(0)) 
+</code></pre>
             </td>
         </tr>
         

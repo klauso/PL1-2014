@@ -182,6 +182,14 @@
                     /Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html
                 </a>
                 
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html
+                </a>
+                
             </div>
         </div>
     </div>
@@ -381,7 +389,8 @@ assert( subst(Fun('x, Add(Id('x0), Id('y))), 'y, Add(Id('x), 5)) == Fun('x1, Add
                      case _ =&gt; sys.error(&quot;can only add numbers&quot;)
                     }
   case App(f,a) =&gt; eval(f) match {
-     case Fun(x,body) =&gt; eval( subst(body,x, eval(a)))
+     case Fun(x,body) =&gt; eval( subst(body,x, eval(a)))  // call-by-value
+     case Fun(x,body) =&gt; eval( subst(body,x, a))        // call-by-name
      case _ =&gt; sys.error(&quot;can only apply functions&quot;)
   }
   case _ =&gt; e // numbers and functions evaluate to themselves

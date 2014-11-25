@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>09-bcfae.scala</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+        /*--------------------- Layout and Typography ----------------------------*/
+        body {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+            font-size: 15px;
+            line-height: 22px;
+            color: #252519;
+            margin: 0; padding: 0;
+        }
+        a {
+            color: #261a3b;
+        }
+        a:visited {
+            color: #261a3b;
+        }
+        p {
+            margin: 0 0 15px 0;
+        }
+        h4, h5, h6 {
+            color: #333;
+            padding: 6px 0 6px 0;
+            font-size: 13px;
+        }
+        h2, h3 {
+            padding-bottom: 15px;
+            color: #000;
+            overflow: hidden;
+        }
+        h1 {
+            /*padding-top: 40px;*/
+            padding-bottom: 15px;
+            color: #000;
+        }
+        #container {
+            position: relative;
+        }
+        /*#background {
+            position: fixed;
+            top: 0; left: 525px; right: 0; bottom: 0;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+            z-index: -1;
+        }*/
+        #jump_to, #jump_page {
+            background: white;
+            -webkit-box-shadow: 0 0 25px #777; -moz-box-shadow: 0 0 25px #777;
+            -webkit-border-bottom-left-radius: 5px; -moz-border-radius-bottomleft: 5px;
+            font: 10px Arial;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: right;
+        }
+        #jump_to, #jump_wrapper {
+            position: fixed;
+            right: 0; top: 0;
+            padding: 5px 10px;
+        }
+        #jump_wrapper {
+            padding: 0;
+            display: none;
+        }
+        #jump_to:hover #jump_wrapper {
+            display: block;
+        }
+        #jump_page {
+            padding: 5px 0 3px;
+            margin: 0 0 25px 25px;
+        }
+        #jump_page .source {
+            display: block;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-top: 1px solid #eee;
+        }
+        #jump_page .source:hover {
+            background: #f5f5ff;
+        }
+        #jump_page .source:first-child {
+        }
+        table td {
+            border: 0;
+            outline: 0;
+        }
+        td.docs, th.docs {
+            max-width: 450px;
+            min-width: 450px;
+            min-height: 5px;
+            padding: 10px 25px 1px 50px;
+            overflow-x: hidden;
+            vertical-align: top;
+            text-align: left;
+        }
+        .docs pre {
+            margin: 15px 0 15px;
+            padding-left: 15px;
+        }
+        .docs p tt, .docs p code, .doc code {
+            background: #f8f8ff;
+            border: 1px solid #dedede;
+            font-size: 12px;
+            padding: 0 0.2em;
+        }
+        .pilwrap {
+            position: relative;
+        }
+        .pilcrow {
+            font: 12px Arial;
+            text-decoration: none;
+            color: #454545;
+            position: absolute;
+            top: 3px; left: -20px;
+            padding: 1px 2px;
+            opacity: 0;
+            -webkit-transition: opacity 0.2s linear;
+        }
+        td.docs:hover .pilcrow {
+            opacity: 1;
+        }
+        td.code, th.code {
+            padding: 10px 10px 10px 50px;
+            width: 100%;
+            vertical-align: top;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+        }
+        pre, tt, code {
+            font-size: 12px; line-height: 18px;
+            font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+            margin: 0; padding: 0;
+        }
+
+        /*---------------------- Prettify Syntax Highlighting -----------------------------*/
+        .str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}
+
+        table.doc { margin-bottom: 20px; }
+        td.doc { border-bottom: 1px dashed #708090; }
+        td.param { font-weight: bold; }
+        td.return { font-weight: bold; text-decoration: underline; }
+    </style>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
+    <script src="https://google-code-prettify.googlecode.com/svn/trunk/src/lang-scala.js" type="text/javascript"></script>
+</head>
+
+<body onload="prettyPrint()">
+<div id="container">
+    <div id="background"></div>
+    <div id="jump_to">
+        Jump To &hellip;
+        <div id="jump_wrapper">
+            <div id="jump_page">
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/01-intro.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/01-intro.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/03-ae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/03-ae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/04-wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/04-wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/06-fae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/06-fae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html
+                </a>
+                
+            </div>
+        </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th class="docs">
+                <h1>09-bcfae.scala</h1>
+            </th>
+            <th class="code"></th>
+        </tr>
+        </thead>
+        <tbody>
+        
+        <tr id="section_0">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_0">&#182;</a>
+                </div>
+                <h1>Mutation</h1>
+<p>Today we study <em>mutation</em>. More specifically, we want to equip our language with mutable data structures.  Typical mutable data structures in common languages include objects with mutable fields or structures/records in languages like C or Pascal.</p>
+<p>We will study a particularly simple mutable data structure: Boxes. In OO parlance, boxes can be thought of as an object with a single field that can be mutated. Despite their simplicity, boxes already illustrate all main issues associated with adding mutable state to a language.</p>
+<p>A different and less interesting form of mutation is the mutability of <em>variables</em>, such as the possibility to assign something to a 'local' variable bound via a lambda or <code>with</code>. We will not talk about mutable variables today.</p>
+<p>We will add boxes to our base language, FAE.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>sealed abstract class Exp
+case class Num(n: Int) extends Exp
+case class Id(name: Symbol) extends Exp
+case class Add(lhs: Exp, rhs: Exp) extends Exp
+case class Mul(lhs: Exp, rhs: Exp) extends Exp
+case class If0(cond: Exp, thenExp: Exp, elseExp: Exp) extends Exp
+implicit def num2exp(n: Int) = Num(n)
+implicit def id2exp(s: Symbol) = Id(s)
+case class Fun(param: Symbol, body: Exp) extends Exp
+case class App (funExpr: Exp, argExpr: Exp) extends Exp
+def wth(x: Symbol, xdef: Exp, body: Exp) : Exp = App(Fun(x,body),xdef)
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <p>To add mutation to FAE, we add four language constructs:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>case class NewBox(e: Exp) extends Exp // create a new box
+case class SetBox(b: Exp, e: Exp) extends Exp // assign to a box
+case class OpenBox(b: Exp) extends Exp // read value in a box
+case class Seq(e1: Exp, e2: Exp) extends Exp // sequencing of expressions
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>In this new language, the following sample program,</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val test1 = wth('b, NewBox(0), 
+              Seq(
+                SetBox('b, Add(1, OpenBox('b))), 
+                OpenBox('b)))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>should give as result <code>1</code> in a proper implementation.</p>
+<p>Let's consider how our interpreter could handle sequencing.</p>
+<p>Here is an attempt:</p>
+<pre><code> case Seq(e1, e2) =&gt; {
+   eval(e1, env)
+   eval(e2, env)
+ }
+</code></pre>
+<p>This cannot be correct. As long as our interpreter does not use mutation, evaluation could not make any changes to the environment, hence there is* no way the evaluation of e1 could have any effect on the evaluation of e2.</p>
+<p>In order to demostrate the actual nature of mutation, we will not use mutation in our meta-language to implement mutation in our object language. That said, we will not use a mutable data structure to implement environment in our interpreter.</p>
+<p>Instead, one may turn to the so-called environment-passing style, in which the interpreter returns also a possibly updated environment together with the computed value when it evaluates an expression.  However, this solution does not always work.  Consider the following example:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val test2 = wth('a, NewBox(1),
+              wth('f, Fun('x, Add('x, OpenBox('a))),
+                Seq(SetBox('a,2),
+                  App('f, 5))))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
+                </div>
+                <p>The mutation should affect the box stored in the closure bound to <code>f</code>.  But with the implementation strategy described above it would not.</p>
+<p>Note that changing the value of a in the example is not a vialation of static scope.  Scoping only says where an identifier is bound; it does not say to what an identifier is bound, in particular, whether whatever bound to the identifier is fixed.  Indeed, the variable a is bound to the same box in both the static environment where the function f is created and the dynamic environment where the function f is applied.</p>
+<p>As before, when applying the function f to the argument 5, we can choose either</p>
+<p>1) To use the static environment (where the variable a is bound to a boxed 1) stored in the closure created for f.
+<br  />2) Or to use the dynamic environment (where the variable a is bound to a  boxed 2) present at the time of applying f.</p>
+<p>The first choice leads the program to evaluate to 6 rather than the expected 7.  The second will record the change to the box, but it reintroduces dynamic scoping.  So both choices do not work.</p>
+<p>Insight: We need <em>two</em> repositories of information.</p>
+<p>One, the environment, guards static scope.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>sealed abstract class Value
+type Env = Map[Symbol, Value]
+case class NumV(n: Int) extends Value
+case class ClosureV(f: Fun, env: Env) extends Value
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_5">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_5">&#182;</a>
+                </div>
+                <p>The other, which we call <em>store</em>, is trackis dynamic changes.</p>
+<p>Determining the value inside a box will become a two-step process: We first evaluate the box expression to an <em>address</em>, and then use the store to lookup the value stored at that address. We choose to represent addresses by integers.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>type Address = Int
+case class AddressV(a: Address) extends Value
+
+type Store = Map[Address, Value]
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_6">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_6">&#182;</a>
+                </div>
+                <p>We will often need a fresh address in the store. We do so using a counter variable.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>var _nextAddress = 0
+
+def nextAddress : Address = {
+  _nextAddress += 1
+  _nextAddress
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_7">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_7">&#182;</a>
+                </div>
+                <p>Note: We promised to implement the interpreter without using mutation. Here we did use mutation, but this musage of mutation is not essential: we could instead just search for the largest address in the present store and add one to it.</p>
+<p>Let's now discuss the evaluation of FAE with conditionals and boxes, BCFAE. To this end, consider the following sample program:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val test3 = wth('switch, NewBox(0),
+             wth('toggle, Fun('dummy, If0(OpenBox('switch),
+                                          Seq(SetBox('switch, 1), 1),
+                                          Seq(SetBox('switch, 0), 0))),
+                 Add(App('toggle,42), App('toggle,42))))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_8">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_8">&#182;</a>
+                </div>
+                <p>This program should return 1. Let's discuss on the blackboard what the environment and store should look like during the evaluation of this program.</p>
+<p>ID      Exp                     Value   Env             Store
+<br  />A       wth(..                          'switch -> ..   1 -> NumV(0)
+<br  />B        wth(..                         'toggle -> ..
+<br  />C         Add(..
+<br  />D          App('toggle)         1                       1 -> NumV(1)
+<br  />E          App('toggle)         0                       1 -> NumV(0)
+<br  />F         Add(0,1)              1</p>
+<p>Insight:</p>
+<p>We must pass the current store in to evaluate every expression and pass the possibly updated store out after the evaluation.  This is called _store-passing style:.  Consequently, we have to update the type of our evaluator.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def eval(e: Exp, env: Env, s: Store) : (Value, Store) = e match {
+  /* All expressions whose evaluation does not alter the store just return s. */
+  case Num(n) =&gt; (NumV(n), s)
+  case Id(x) =&gt; (env(x), s)
+  case f@Fun(_, _) =&gt; (ClosureV(f, env), s)
+  /* In recursive cases we have to thread the store through the
+   * evaluation. In particular, we define the order of evaluation
+   * explicitly through data flow dependencies.
+  case If0(cond, thenExp, elseExp)
+    =&gt; eval(cond, env, s) match {
+         case (NumV(0), s1) =&gt; eval(thenExp, env, s1)
+         case (_, s1)       =&gt; eval(elseExp, env, s1)
+
+         /* An alternative that enfoces runtime type-correctness of
+          * the conditional expression:
+
+         case (NumV(_), s1) =&gt; eval(elseExp, env, s1)
+         case _             =&gt; sys.error(&quot;can only test if a number is 0&quot;)
+
+       }
+
+  case Add(l, r)
+    =&gt; eval(l, env, s) match {
+         case (NumV(v1), s1)
+           =&gt; eval(r, env, s1) match {
+                case (NumV(v2), s2) =&gt; (NumV(v1 + v2), s2)
+                case _ =&gt; sys.error(&quot;can only add numbers&quot;)
+              }
+         case _
+           =&gt; sys.error(&quot;can only add numbers&quot;)
+       }
+
+  case Mul(l, r)
+    =&gt; eval(l, env, s) match {
+         case (NumV(v1), s1)
+           =&gt; eval(r, env, s1) match {
+                case (NumV(v2), s2) =&gt; (NumV(v1 * v2), s2)
+                case _ =&gt; sys.error(&quot;can only multiply numbers&quot;)
+              }
+         case _ =&gt; sys.error(&quot;can only multiply numbers&quot;)
+       }
+
+  case App(f, a)
+    =&gt; eval(f, env, s) match {
+         case (ClosureV(f, closureEnv), s1)
+           =&gt; eval(a, env, s1) match {
+                case (av, s2)
+                  =&gt; eval(f.body, closureEnv + (f.param -&gt; av), s2)
+              }
+         case _ =&gt; sys.error(&quot;can only apply functions&quot;)
+       }
+
+  /* In a sequence, we ignore the result of evaluating e1 but not its
+   * effect on the store.
+  case Seq(e1, e2) =&gt; eval(e2, env, eval(e1, env, s)._2)
+
+  /* A new box is created by putting it into the store at a new
+   * address.
+  case NewBox(e: Exp)
+    =&gt; eval(e, env, s) match {
+         case (v, s1) =&gt; {
+           val a = nextAddress
+           (AddressV(a), s1 + (a -&gt; v))
+         }
+       }
+
+  /* Setting a box is now a two-step process: First evaluate b to an
+   * address, then lookup and update the value associated to the
+   * address in the store. Note that &quot;updated&quot; is a functional method.
+  case SetBox(b: Exp, e: Exp)
+    =&gt; eval(b, env, s) match {
+         case (AddressV(a), s1)
+           =&gt; eval(e, env, s1) match {
+                case (ev, s2) =&gt; (ev, s2.updated(a, ev))
+              }
+         case _ =&gt; sys.error(&quot;can only set boxes&quot;)
+       }
+
+  /* OpenBox uses the same two-step process but does not update the
+   * store.
+  case OpenBox(b: Exp)
+    =&gt; eval(b, env, s) match {
+         case (AddressV(a), s1) =&gt; (s1(a), s1)
+         case _                 =&gt; sys.error(&quot;can only open boxes&quot;)
+       }
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_9">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_9">&#182;</a>
+                </div>
+                <p>From an implementation point of view, our interpreter has the problem that nothing is ever removed from the store. One possibility would be to add an operation &ldquo;removeBox&rdquo; or the like to the language, but this would lead to dangling pointers and all the* problems associated with manual memory management.</p>
+<p>Our model of stores is sufficient to illustrate how modern languages deal with memory management: by garbage collection. Garbage collectors automatically reclaim memory that is no longer referenced from within the active part of the computation. We can* model a (naive) mark-and-sweep garbage collector as follows:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def gc(env: Env, store:Store) : Store = {
+
+  def allAddrInVal(v: Value) : Set[Address] = v match {
+    case AddressV(a)      =&gt; Set(a)
+    case NumV(_)          =&gt; Set.empty
+    case ClosureV(f, env) =&gt; allAddrInEnv(env)
+  }
+
+  def allAddrInEnv(env: Env) : Set[Address] =
+    env.values.map(allAddrInVal _).fold(Set.empty)(_ union _)
+
+  def mark(seed: Set[Address]) : Set[Address] = {
+    val newAddresses = seed.flatMap(ad =&gt; allAddrInVal(store(ad)))
+    if (newAddresses.subsetOf(seed)) seed
+    else mark(seed union newAddresses)
+  }
+
+  val marked = mark(allAddrInEnv(env)) // mark ...
+  store.filterKeys(marked(_))           // and sweep!
+}
+
+val teststore = Map(
+  6  -&gt; NumV(42),
+  7  -&gt; NumV(6),
+  8  -&gt; AddressV(6),
+  9  -&gt; AddressV(7),
+  10 -&gt; ClosureV(Fun('x, 'y), Map('y -&gt; AddressV(8)))
+)
+
+/*
+
+10 -&gt; 8 -&gt; 6
+
+      9 -&gt; 7
+
+
+assert(gc(Map('a -&gt; AddressV(10)), teststore) == teststore - 7 - 9)
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_10">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_10">&#182;</a>
+                </div>
+                <p>Note that garbage collectors only <em>approximate</em> the set of semantically disposable store entities. Even with garbage collectors, applications may very well suffer from memory leaks. The approximation should be <em>safe</em>, in the sense that a datum is never reclaimed when it is used by subsequent computations. Furthermore, it must reclaim enough garbage to be actually useful. Reachability has turned out to be a rather useful (and sound) approximation of semantic disposability. Garbage collectors must also be efficient. Efficiency of GC is a huge research topic that we are not going to discuss. One efficiency problem with garbage collectors based on reachability that we want to mention is the &ldquo;stop-the-world&rdquo; phenomenon.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
+            </td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
