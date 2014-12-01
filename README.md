@@ -22,6 +22,8 @@ Schedule
  * November 13. Lecture
  * November 17. Exercise: Pretty Printing, [Closures in Java](exercises/Closures.java)
  * November 18 & 20. Lecture: Call-by-name and call-by-need, thunks
+ * November 24. Exercise: Call-by-name & lazy val in Scala
+ * December 1. Exercise: Recursion
 
 Homework
 --------
@@ -34,3 +36,5 @@ You have to hand in reasonable homework for all but one assignment to attend the
    assignment at the end of [exercises/02-pattern-matching.scala](exercises/02-pattern-matching.scala).
  * Hand in before Monday morning, November 24:
    assignment at the end of [exercises/05-pretty.scala](exercises/05-pretty.scala).
+ * Hand in before Monday morning, December 8:
+   assignment in [exercises/hw-cbn.scala](exercises/hw-cbn-scala)
