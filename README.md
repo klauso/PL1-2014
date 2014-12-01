@@ -37,4 +37,4 @@ You have to hand in reasonable homework for all but one assignment to attend the
  * Hand in before Monday morning, November 24:
    assignment at the end of [exercises/05-pretty.scala](exercises/05-pretty.scala).
  * Hand in before Monday morning, December 8:
-   assignment in [exercises/hw-cbn.scala](exercises/hw-cbn-scala)
+   assignment in [exercises/hw-cbn.scala](exercises/hw-cbn.scala)
