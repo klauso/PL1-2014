@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>10-gc.scala</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+        /*--------------------- Layout and Typography ----------------------------*/
+        body {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+            font-size: 15px;
+            line-height: 22px;
+            color: #252519;
+            margin: 0; padding: 0;
+        }
+        a {
+            color: #261a3b;
+        }
+        a:visited {
+            color: #261a3b;
+        }
+        p {
+            margin: 0 0 15px 0;
+        }
+        h4, h5, h6 {
+            color: #333;
+            padding: 6px 0 6px 0;
+            font-size: 13px;
+        }
+        h2, h3 {
+            padding-bottom: 15px;
+            color: #000;
+            overflow: hidden;
+        }
+        h1 {
+            /*padding-top: 40px;*/
+            padding-bottom: 15px;
+            color: #000;
+        }
+        #container {
+            position: relative;
+        }
+        /*#background {
+            position: fixed;
+            top: 0; left: 525px; right: 0; bottom: 0;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+            z-index: -1;
+        }*/
+        #jump_to, #jump_page {
+            background: white;
+            -webkit-box-shadow: 0 0 25px #777; -moz-box-shadow: 0 0 25px #777;
+            -webkit-border-bottom-left-radius: 5px; -moz-border-radius-bottomleft: 5px;
+            font: 10px Arial;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: right;
+        }
+        #jump_to, #jump_wrapper {
+            position: fixed;
+            right: 0; top: 0;
+            padding: 5px 10px;
+        }
+        #jump_wrapper {
+            padding: 0;
+            display: none;
+        }
+        #jump_to:hover #jump_wrapper {
+            display: block;
+        }
+        #jump_page {
+            padding: 5px 0 3px;
+            margin: 0 0 25px 25px;
+        }
+        #jump_page .source {
+            display: block;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-top: 1px solid #eee;
+        }
+        #jump_page .source:hover {
+            background: #f5f5ff;
+        }
+        #jump_page .source:first-child {
+        }
+        table td {
+            border: 0;
+            outline: 0;
+        }
+        td.docs, th.docs {
+            max-width: 450px;
+            min-width: 450px;
+            min-height: 5px;
+            padding: 10px 25px 1px 50px;
+            overflow-x: hidden;
+            vertical-align: top;
+            text-align: left;
+        }
+        .docs pre {
+            margin: 15px 0 15px;
+            padding-left: 15px;
+        }
+        .docs p tt, .docs p code, .doc code {
+            background: #f8f8ff;
+            border: 1px solid #dedede;
+            font-size: 12px;
+            padding: 0 0.2em;
+        }
+        .pilwrap {
+            position: relative;
+        }
+        .pilcrow {
+            font: 12px Arial;
+            text-decoration: none;
+            color: #454545;
+            position: absolute;
+            top: 3px; left: -20px;
+            padding: 1px 2px;
+            opacity: 0;
+            -webkit-transition: opacity 0.2s linear;
+        }
+        td.docs:hover .pilcrow {
+            opacity: 1;
+        }
+        td.code, th.code {
+            padding: 10px 10px 10px 50px;
+            width: 100%;
+            vertical-align: top;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+        }
+        pre, tt, code {
+            font-size: 12px; line-height: 18px;
+            font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+            margin: 0; padding: 0;
+        }
+
+        /*---------------------- Prettify Syntax Highlighting -----------------------------*/
+        .str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}
+
+        table.doc { margin-bottom: 20px; }
+        td.doc { border-bottom: 1px dashed #708090; }
+        td.param { font-weight: bold; }
+        td.return { font-weight: bold; text-decoration: underline; }
+    </style>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
+    <script src="https://google-code-prettify.googlecode.com/svn/trunk/src/lang-scala.js" type="text/javascript"></script>
+</head>
+
+<body onload="prettyPrint()">
+<div id="container">
+    <div id="background"></div>
+    <div id="jump_to">
+        Jump To &hellip;
+        <div id="jump_wrapper">
+            <div id="jump_page">
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/01-intro.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/01-intro.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/03-ae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/03-ae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/04-wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/04-wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/06-fae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/06-fae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/10-gc.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/10-gc.html
+                </a>
+                
+            </div>
+        </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th class="docs">
+                <h1>10-gc.scala</h1>
+            </th>
+            <th class="code"></th>
+        </tr>
+        </thead>
+        <tbody>
+        
+        <tr id="section_0">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_0">&#182;</a>
+                </div>
+                
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <h1>Garbage Collection</h1>
+<p>Let us now consider a more accurate modeling of garbage collection (gc). This time, we will use a mutable store instead of a functional store, because our purpose is not to explain mutation but to explain gc.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>import scala.collection.mutable.ArraySeq
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>This is the well-known syntax of our language: FAE with boxes.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>sealed abstract class Exp
+case class Num(n: Int) extends Exp
+case class Id(name: Symbol) extends Exp
+case class Add(lhs: Exp, rhs: Exp) extends Exp
+case class Mul(lhs: Exp, rhs: Exp) extends Exp
+case class If0(cond: Exp, thenExp: Exp, elseExp: Exp) extends Exp
+implicit def num2exp(n: Int) = Num(n)
+implicit def id2exp(s: Symbol) = Id(s)
+case class Fun(param: Symbol, body: Exp) extends Exp
+case class App (funExpr: Exp, argExpr: Exp) extends Exp
+def wth(x: Symbol, xdef: Exp, body: Exp) : Exp = App(Fun(x,body),xdef)
+
+case class NewBox(e: Exp) extends Exp
+case class SetBox(b: Exp, e: Exp) extends Exp
+case class OpenBox(b: Exp) extends Exp
+case class Seq(e1: Exp, e2: Exp) extends Exp
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>We will equip our values with a mutable flag that is useful for mark-and-sweep garbage collection. In real systems it is implemented as a bit flag, or, if the so-called &ldquo;tri-color algorithm&rdquo; is used, with two bit flags.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>abstract class Value { 
+  var marked : Boolean = false
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
+                </div>
+                <p>We will also use a mutable map instead of a map for environments. This is not needed for mark-and-sweep, but for copying garbage collectors such as Cheney's semi-space garbage collection algorithm.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>type Env = scala.collection.mutable.Map[Symbol, Value]
+case class NumV(n: Int) extends Value
+case class ClosureV(f: Fun, env: Env) extends Value
+case class AddressV(a: Int) extends Value
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_5">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_5">&#182;</a>
+                </div>
+                <p>To be able to experiment with different store and gc designs, we create an interface for stores. The stack parameter in malloc is needed during gc to determine the root nodes from which the algorithms can start.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>trait Store {
+  def malloc(stack: List[Env], v: Value) : Int
+  def update(index: Int, v: Value) : Unit
+  def apply(index: Int) : Value
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_6">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_6">&#182;</a>
+                </div>
+                <p>In our interpreter, the stack of environments is only implicitly available on the stack of the meta-language. To reify the call-stack we need to make it explicit. We do so by constructing the stack explicitly and passing it as parameter. The first element of the stack is the current environment; the rest is only needed for gc.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def eval(e: Exp, stack: List[Env], store: Store) : Value = e match {
+
+  case Num(n) =&gt; NumV(n)
+
+  case Id(x) =&gt; stack.head(x)
+
+  case f@Fun(_, _) =&gt; ClosureV(f, stack.head)
+
+  /* With a mutable store, we do not have to thread it according to
+   * the order of evaluation any more.
+
+  case If0(cond, thenExp, elseExp)
+    =&gt; eval(cond, stack, store) match {
+         case NumV(0) =&gt; eval(thenExp, stack, store)
+         case _       =&gt; eval(elseExp, stack, store)
+       }
+
+  /* The mutable store allows us to take advantage of Scala's
+   * evaluation order and perform two pattern matchings
+   * simultaneously.
+
+  case Add(l, r)
+    =&gt; (eval(l, stack, store), eval(r, stack, store)) match {
+         case (NumV(v1), NumV(v2)) =&gt; NumV(v1 + v2)
+         case _ =&gt; sys.error(&quot;can only add numbers&quot;)
+       }
+
+  case Mul(l, r)
+    =&gt; (eval(l, stack, store), eval(r, stack, store)) match {
+         case (NumV(v1), NumV(v2)) =&gt; NumV(v1 * v2)
+         case _ =&gt; sys.error(&quot;can only multiply numbers&quot;)
+       }
+
+  /* A new environment should be pushed onto the stack only when
+   * binding occurs. Where exactly in BCFAE do bindings happen?
+
+  case App(f, a)
+    =&gt; eval(f, stack, store) match {
+         case ClosureV(f, cEnv)
+           =&gt; eval(
+                f.body,
+                (cEnv + (f.param -&gt; eval(a, stack, store))) :: stack,
+                store
+              )
+         case _ =&gt; sys.error(&quot;can only apply functions&quot;)
+       }
+
+  /* The mutable store allows us to implement Seq-expression
+   * in terms of sequencing in Scala itself.
+
+  case Seq(e1, e2)
+    =&gt; eval(e1, stack, store); eval(e2, stack, store)
+
+  case NewBox(e: Exp)
+    =&gt; {
+         val a = store.malloc(stack, eval(e, stack, store))
+         AddressV(a)
+       }
+
+  case SetBox(b: Exp, e: Exp)
+    =&gt; eval(b, stack, store) match {
+         case AddressV(a)
+           =&gt; {
+                val ev = eval(e, stack, store)
+                store.update(a, ev)
+                ev
+              }
+         case _ =&gt; sys.error(&quot;can only set boxes&quot;)
+       }
+
+  case OpenBox(b: Exp)
+    =&gt; eval(b, stack, store) match {
+         case AddressV(a) =&gt; store(a)
+         case _ =&gt; sys.error(&quot;can only open boxes&quot;)
+       }
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_7">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_7">&#182;</a>
+                </div>
+                <p>Here is one implementation of the Store interface that does not perform gc. It just runs out of memory once the store is full.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>class NoGCStore(size: Int) extends Store {
+
+  val memory = new ArraySeq[Value](size)
+
+  var nextFreeAddr : Int = 0
+
+  def malloc(stack: List[Env], v: Value) : Int = {
+    val x = nextFreeAddr
+    if (x &gt;= size) sys.error(&quot;out of memory&quot;)
+    nextFreeAddr += 1
+    update(x, v)
+    x
+  }
+
+  def update(index: Int, v: Value) : Unit = memory.update(index, v)
+
+  def apply(index: Int) = memory(index)
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_8">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_8">&#182;</a>
+                </div>
+                <p>Here is a mark-and-sweep garbage collector.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>class MarkAndSweepStore(size: Int) extends Store {
+
+  val memory = new ArraySeq[Value](size)
+
+  var free : Int = size
+
+  var nextFreeAddr : Int = 0
+
+  def malloc(stack: List[Env], v: Value) : Int = {
+    if (free &lt;= 0) gc(stack)
+    if (free &lt;= 0) sys.error(&quot;out of memory&quot;)
+
+    /* Here we find the next available location in memory via a while-
+     * loop. In order to avoid maintaining a list of available spaces
+     * (because we are lazy), let us assume that no box created in
+     * BCFAE can has an address pointing to a null memory cell (which
+     * also is the case).
+     *
+     * If we ensure the invariant that the variable `free` has always
+     * the number of free memory space, then the following loop will
+     * always halt. The nontermination situation will generate an out-
+     * of-memory error and the program will abort.
+
+    while (memory(nextFreeAddr) != null) {
+      nextFreeAddr += 1
+      if (nextFreeAddr == size) nextFreeAddr = 0
+    }
+
+    free -= 1
+    update(nextFreeAddr, v)
+    nextFreeAddr
+  }
+
+  def update(index: Int, v: Value) : Unit = memory.update(index, v)
+
+  def apply(index: Int) = memory(index)
+
+  def allAddrInVal(v: Value) : Set[Int] = v match {
+    case AddressV(a)      =&gt; Set(a)
+    case NumV(_)          =&gt; Set.empty
+    case ClosureV(f, env) =&gt; allAddrInEnv(env)
+  }
+
+  def allAddrInEnv(env: Env) : Set[Int] =
+    env.values.map(allAddrInVal _).fold(Set.empty)(_ union _)
+
+  def mark(seed: Set[Int]) : Unit = {
+    seed.foreach(memory(_).marked = true)
+    val newAddresses = seed.flatMap(
+                         ad =&gt; allAddrInVal(memory(ad))
+                       ).filter(!memory(_).marked)
+    if(newAddresses != Set.empty) {
+      mark(newAddresses)
+    }
+  }
+
+  /* What graph algorithm underlies the mark step as implemented here?
+   * What potential problem it could cause in a &quot;real&quot; interpreter?
+
+  def sweep() : Unit = {
+    memory.indices.foreach(
+      index =&gt;   if (memory(index) == null) {
+                   /* No work needed on an empty memory cell */
+                 }
+                 else if (memory(index).marked) {
+                   /* Reset `marked` flag for the next gc */
+                   memory(index).marked = false
+                 }
+                 else {
+                   free += 1
+                   memory(index) = null
+                 }
+    )
+  }
+
+  def gc(stack: List[Env]) : Unit = {
+    println(&quot;\nSTARTING GC\nSTACK = &quot; + stack + &quot;\nSTORE = &quot; + memory)
+    mark(stack.map(allAddrInEnv _).fold(Set.empty)(_ union _))
+    sweep()
+    println(&quot;GC COMPLETE\nSTORE = &quot; + memory +
+            &quot;\nNUMBER OF FREE SLOTS = &quot; + free)
+  }
+}
+
+val test4 = wth('makedata, Fun('x, NewBox(NewBox(NewBox('x)))),
+                Seq(App('makedata, 1),
+                Seq(App('makedata, 2),
+                Seq(wth('s, App('makedata, 3),
+                            App('makedata, 's)),
+                    App('makedata, 4)))))
+
+def runTest4 = eval(
+                 test4,
+                 List(scala.collection.mutable.Map.empty),
+                 new MarkAndSweepStore(5)
+               )
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_9">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_9">&#182;</a>
+                </div>
+                <p>This model of garbage collection does not illustrate the difficulty of memory management. In most languages, the size of the allocated memory regions on the heap vary, and hence one needs an algorithm to find a free and large-enough spot on the heap. There are various algorithms and heuristics (best-fit, worst-fit, first-fit, &hellip;) for that purpose.</p>
+<p>There are also various alternative gc designs. Mark-and-sweep is a non-moving algorithm, where reachable heap objects are never moved. In contrast to that, copying gc algorithms move the reachable objects to a different portion of the heap. One of the oldest algorithms is the semi-space garbage collector, in particular with the implementation purpose.</p>
+<pre><code> http://www.cs.umd.edu/class/fall2002/cmsc631/cheney/cheney.html
+</code></pre>
+<p>Topic for class discussion: What are the pros and cons of moving vs. non-moving gc?</p>
+<p>It can be shown empirically that most unreachable objects become unreachable while they are still young. Generational gc algorithms take this empirical fact into account and divide the objects into generations, whereby the (small) youngest generation of objects is garbage-collected more frequently.</p>
+<p>A typical problem of the simple gc algorithms we discussed is the stop-the-world phenomenon: All execution has to be stopped during a gc cycle. This issue is addressed by incremental or concurrent garbage collectors. Incremental garbage collectors typically reduce* the total throughput but increase responsiveness and real-time behavior.</p>
+<p>A completely different approach to memory management is <em>reference counting</em>. In reference counting, each object on the heap (in our case, each box) maintains a counter which says how many pointers currently point to that object. The counter is adjusted whenever a pointer variable is assigned to this object (incremented), or from this object to another object (decremented). When the counter is 0, the object can be reclaimed.</p>
+<p>The obvious disadvantage of reference counting is that it cannot detect cycles on the heap. Hence reference counting algorithm must be augmented with some means to detect cycles.</p>
+<p>Topic for class discussion: What are the pros and cons of reference counting vs. tracing garbage collectors such as mark-and-sweep or semi-space?</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
+            </td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
