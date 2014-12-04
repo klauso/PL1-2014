@@ -23,7 +23,9 @@ Schedule
  * November 17. Exercise: Pretty Printing, [Closures in Java](exercises/Closures.java)
  * November 18 & 20. Lecture: Call-by-name and call-by-need, thunks
  * November 24. Exercise: Call-by-name & lazy val in Scala
+ * November 25 & 26. Lecture: Recursion and Mutation
  * December 1. Exercise: Recursion
+ * December 2 & 4. Lecture: Mutation and Garbage Collection
 
 Homework
 --------
