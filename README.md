@@ -26,6 +26,8 @@ Schedule
  * November 25 & 26. Lecture: Recursion and Mutation
  * December 1. Exercise: Recursion
  * December 2 & 4. Lecture: Mutation and Garbage Collection
+ * December 8. Exercise: Mutable Variables vs. Boxes
+ * December 9. Guest Lecture by Karl Klose on the Dart to Javascript compiler
 
 Homework
 --------
@@ -40,3 +42,5 @@ You have to hand in reasonable homework for all but one assignment to attend the
    assignment at the end of [exercises/05-pretty.scala](exercises/05-pretty.scala).
  * Hand in before Monday morning, December 8:
    assignment in [exercises/hw-cbn.scala](exercises/hw-cbn.scala)
+ * Hand in before Monday morning, December 15:
+   assignment in [exercises/hw-mutation.scala](exercises/hw-mutation.scala)
