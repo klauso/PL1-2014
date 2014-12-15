@@ -194,6 +194,14 @@
                     /Users/klaus/git/PL1-2014/lecturenotes/10-gc.html
                 </a>
                 
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/11-syntacticvsmeta.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/11-syntacticvsmeta.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/12-churchencoding.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/12-churchencoding.html
+                </a>
+                
             </div>
         </div>
     </div>
@@ -473,7 +481,7 @@ case class AddressV(a: Int) extends Value
      * If we ensure the invariant that the variable `free` has always
      * the number of free memory space, then the following loop will
      * always halt. The nontermination situation will generate an out-
-     * of-memory error and the program will abort.
+     * of-memory error and the program will abort. */
 
     while (memory(nextFreeAddr) != null) {
       nextFreeAddr += 1
@@ -509,7 +517,7 @@ case class AddressV(a: Int) extends Value
   }
 
   /* What graph algorithm underlies the mark step as implemented here?
-   * What potential problem it could cause in a &quot;real&quot; interpreter?
+   * What potential problem it could cause in a &quot;real&quot; interpreter? */
 
   def sweep() : Unit = {
     memory.indices.foreach(

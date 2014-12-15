@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>08-rcfae.scala</title>
+    <title>12-churchencoding.scala</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <style type="text/css">
         /*--------------------- Layout and Typography ----------------------------*/
@@ -210,7 +210,7 @@
         <thead>
         <tr>
             <th class="docs">
-                <h1>08-rcfae.scala</h1>
+                <h1>12-churchencoding.scala</h1>
             </th>
             <th class="code"></th>
         </tr>
@@ -222,23 +222,21 @@
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_0">&#182;</a>
                 </div>
-                <h1>Recursion</h1>
-<p>Let's try to write a function that computes the sum of the first n integers. Let's pretend we do not know that the sum of the first n integers is n*(n+1)/2 and instead compute the sum in a loop. Let's try to do this in FAE (with if0):</p>
+                <h1>Church Encoding</h1>
+<p>Today we shrink our language. It does not seem to be big, but today we want to  illustrate how powerful our core language, the lambda calculus, is. Here is a shrinked version of FAE that does not even have numbers anymore. For testing purposes, we introduce a new expression <code>PrintDot</code> whose semantics is to print a dot on the screen.</p>
 
             </td></tr><tr>
             <td class="code">
                 <pre><code class='prettyprint lang-scala'>sealed abstract class Exp
-case class Num(n: Int) extends Exp
 case class Id(name: Symbol) extends Exp
-case class Add(lhs: Exp, rhs: Exp) extends Exp
-case class If0(cond: Exp, thenExp: Exp, elseExp: Exp) extends Exp
-implicit def num2exp(n: Int) = Num(n)
 implicit def id2exp(s: Symbol) = Id(s)
 case class Fun(param: Symbol, body: Exp) extends Exp
 case class App (funExpr: Exp, argExpr: Exp) extends Exp
-def wth(x: Symbol, xdef: Exp, body: Exp) : Exp = App(Fun(x,body),xdef)
+case class PrintDot() extends Exp
 
-val sumattempt = wth('sum, Fun('n, If0('n, 0, Add('n, App('sum, Add('n,-1))))), App('sum, 10))
+abstract class Value // the only values are closures
+type Env = Map[Symbol, Value]
+case class ClosureV(f:Fun, env:Env) extends Value
 
 </code></pre>
             </td>
@@ -249,11 +247,19 @@ val sumattempt = wth('sum, Fun('n, If0('n, 0, Add('n, App('sum, Add('n,-1))))), 
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_1">&#182;</a>
                 </div>
-                <p>However, sumattempt won't work and yield an unbound identifier error (why?). An alternative would be to use a variant of the y combinator to support recursion properly, but today we want to talk about direct support for recursion. More specifically, we want a language construct &ldquo;letrec&rdquo; that is similar to &ldquo;with&rdquo;,  except that the bound symbol can be used in the expression the symbol is bound to:</p>
+                <p>Notice that the only values in this language are closures. This means that there cannot be the situation anymore that we expect, say, a number but get in fact a closure. Hence, this language has the fascinating property that  no dynamic type errors can occur.</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>case class Letrec(x: Symbol, e: Exp, body: Exp) extends Exp
+                <pre><code class='prettyprint lang-scala'>def eval(e: Exp, env: Env) : Value = e match {
+  // We give the identity function as dummy value for PrintDot
+  case PrintDot() =&gt; print(&quot;.&quot;); ClosureV(Fun('x,'x), Map.empty) 
+  case Id(x) =&gt; env(x)
+  case f@Fun(param,body) =&gt; ClosureV(f, env)
+  case App(f,a) =&gt; eval(f,env) match {
+    case ClosureV(f,closureEnv) =&gt; eval(f.body, closureEnv + (f.param -&gt; eval(a,env)))
+  }
+}
 
 </code></pre>
             </td>
@@ -264,11 +270,17 @@ val sumattempt = wth('sum, Fun('n, If0('n, 0, Add('n, App('sum, Add('n,-1))))), 
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_2">&#182;</a>
                 </div>
-                <p>Using letrec, our example can be expressed as follows.</p>
+                <p>Now we want to illustrate that we can, in principle, bootstrap a full programming language from this small core. To do so, we use the technique of Church encoding. This means that each datum is represented by its own fold function.</p>
+<h2>Church Encoding of Booleans</h2>
+<p>Let's start with booleans and boolean arithmetic.</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>val sum = Letrec('sum, Fun('n, If0('n, 0, Add('n, App('sum, Add('n,-1))))), App('sum, 10))
+                <pre><code class='prettyprint lang-scala'>val f = Fun('t, Fun('f, 'f))  // false
+val t = Fun('t, Fun('f, 't))  // true
+val and = Fun('a, Fun('b, App(App('a, 'b),'a)))
+val or = Fun('a, Fun('b, App(App('a, 'a), 'b)))
+val not = Fun('a, Fun('t, Fun('f, App(App('a,'f),'t))))
 
 </code></pre>
             </td>
@@ -279,35 +291,12 @@ val sumattempt = wth('sum, Fun('n, If0('n, 0, Add('n, App('sum, Add('n,-1))))), 
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_3">&#182;</a>
                 </div>
-                <p>Let's now consider the semantics of letrec. Consider the evaluation of <code>Letrec(x,e,body)</code> in an environment <code>env</code>.</p>
-<p>What environment should we use to evaluate e and body, respectively? Using env for e will produce a <code>ClosureV(Fun('n,...'sum'...),env)</code>, and hence the environment when evaluating body will be <code>envbody = env + (x -&gt; ClosureV(Fun('n,...'sum...),env))</code>. This is bad, because the <code>env</code> in the closure does not contain a binding for <code>'sum</code> and hence the recursive invocation will fail.</p>
-<p>The environment in the closure must contain a mapping for <code>'sum</code>. Hence envbody should look like</p>
-<pre><code>envbody = env + (x -&gt; ClosureV(Fun('n, ...'sum...), 
-                               env+('sum -&gt; ClosureV(Fun('n,...'sum...),env)))
-</code></pre>
-<p>This looks better, but now the second closure contains an environment with no binding of <code>'sum</code>. What we need is an environment that satisfies the equation:</p>
-<pre><code>envbody == env + (x -&gt; ClosureV(Fun('n, ...'sum..), envbody))
-</code></pre>
-<p>Obviously envbody must be circular. There are different ways to create such a circular environment. We will choose mutation to create a circle. More specifically, we introduce a mutable pointer to a value (class ValuePointer) which will be initialized with a null pointer. In the Letrec case, we put such a ValuePointer in the environment and evaluate the (recursive) expression in that environment. Then we update the pointer with the result of evaluating that epxression.</p>
-<p>The only other change we need to make is to dereference a potential value pointer in the Id case. We deal with the necessary case distinction by a polymorphic &ldquo;value&rdquo; method.</p>
-<p>Due to the mutual recursion between ValueHolder and Value the definitions are put into an object.</p>
+                <p>We can now write our own control structures, such as if/then/else</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>object Values {
-  trait ValueHolder {
-    def value : Value
-  }  
-  sealed abstract class Value extends ValueHolder { def value = this }
-  case class ValuePointer(var v: Value) extends ValueHolder { def value = v }
-  case class NumV(n: Int) extends Value
-  case class ClosureV(f: Fun, env: Env) extends Value
-  type Env = Map[Symbol, ValueHolder] 
-}  
+                <pre><code class='prettyprint lang-scala'>val ifthenelse = Fun('cond, Fun('t, Fun('f, App(App('cond, 't), 'f))))
 
-import Values._  // such that we do not have to write Values.ValueHolder etc.
-
- 
 </code></pre>
             </td>
         </tr>
@@ -317,36 +306,20 @@ import Values._  // such that we do not have to write Values.ValueHolder etc.
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_4">&#182;</a>
                 </div>
-                <p>The interpreter is unchanged except for the additional Letrec case and the modified Id case.</p>
+                <h2>Church Encoding of Numbers</h2>
+<p>Let's now consider Numbers. We encode them as Peano numbers.  These encodings of numbers are often called <em>Church numbers</em>.</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>def eval(e: Exp, env: Env) : Value = e match {
-  case Num(n: Int) =&gt; NumV(n)
-  case Id(x) =&gt; env(x).value  // dereference potential ValuePointer
-  case If0(cond, thenExp, elseExp) =&gt; eval(cond,env) match {
-    case NumV(0) =&gt; eval(thenExp,env)
-    case _ =&gt; eval(elseExp,env)
-  }    
-  case Add(l,r) =&gt; {
-    (eval(l,env), eval(r,env)) match {
-      case (NumV(v1),NumV(v2)) =&gt; NumV(v1+v2)
-      case _ =&gt; sys.error(&quot;can only add numbers&quot;)
-    }
-  }
-  case f@Fun(param,body) =&gt; ClosureV(f, env)
-  case App(f,a) =&gt; eval(f,env) match {
-    case ClosureV(f,closureEnv) =&gt; eval(f.body, closureEnv + (f.param -&gt; eval(a,env)))
-    case _ =&gt; sys.error(&quot;can only apply functions&quot;)
-  }
-  case Letrec(x,e,body) =&gt; {
-    val vp = ValuePointer(null)  // initialize pointer with null
-    val newenv = env + (x -&gt; vp)  // evaluate e in the environment extended with the placeholder
-	vp.v = eval(e,newenv)         // create the circle in the environment
-    eval(body,newenv) // evaluate body in circular environment
-  }
-}
-
+                <pre><code class='prettyprint lang-scala'>val zero = Fun('s, Fun('z, 'z))
+val succ = Fun('n, Fun('s, Fun('z, App('s, App(App('n, 's),'z)))))
+val one = App(succ, zero)
+val two = App(succ, one)
+val three = App(succ, two)
+val add  = Fun('a, Fun('b, Fun('s, Fun('z, App(App('a,'s), App(App('b, 's),'z))))))
+val mult = Fun('a, Fun('b, Fun('s, Fun('z, App(App('a, App('b,'s)), 'z)))))
+val exp  = Fun('a, Fun('b, App(App('b, App(mult, 'a)), one)))
+val iszero = Fun('a, App(App('a, Fun('x, f)), t))
 </code></pre>
             </td>
         </tr>
@@ -356,19 +329,65 @@ import Values._  // such that we do not have to write Values.ValueHolder etc.
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_5">&#182;</a>
                 </div>
-                <p>The sum of numbers from 1 to 10 should be 55.</p>
+                <p>The predecessor function is more complicated (why?). We do not show it here.</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>assert(eval(sum, Map.empty) == NumV(55))
+                <pre><code class='prettyprint lang-scala'>val printnum = Fun('a, App(App('a, Fun('x, PrintDot())), f))
 
-// These test cases were contributed by rzhxeo (Sebastian Py)
-var func = Fun('n, If0('n, 0, App('func, Add('n, -1))))
-var test1 = Letrec('func, func, App('func, 1))
-var test2 = Letrec('func, App(Fun('notUsed, func), 0), App('func, 1))
-assert(eval(test1, Map()) == NumV(0)) 
-assert(eval(test2, Map()) == NumV(0)) 
 </code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_6">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_6">&#182;</a>
+                </div>
+                <h2>Church encoding of lists</h2>
+<p>Again straightforward, except &ldquo;tail&rdquo;, which we do not show here. It needs the same kind of trick (called &ldquo;pairing trick&rdquo;) as the predecessor function.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val emptylist = Fun('c, Fun('e, 'e))
+val cons = Fun('h, Fun('r, Fun('c, Fun('e, App(App('c, 'h), App(App('r,'c),'e))))))
+val head = Fun('l, App(App('l, Fun('h, Fun('t, 'h))), f))
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_7">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_7">&#182;</a>
+                </div>
+                <p>For instance, we can multiply all numbers in a list</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>val multlist = Fun('l, App(App('l, mult), one))
+/* Here is the list 3,2,3 */
+val list323 = App(App(cons, three), App(App(cons, two), App(App(cons,three),emptylist)))
+
+val test = App(printnum, App(multlist, list323))
+/* Calling exec should yield 18 dots before the dummy result */
+def exec = eval(test, Map.empty) 
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_8">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_8">&#182;</a>
+                </div>
+                <p>Topic for class discussion: Can we do these encodings directly in Scala or Haskell?</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
             </td>
         </tr>
         

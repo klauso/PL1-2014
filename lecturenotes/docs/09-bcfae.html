@@ -194,6 +194,14 @@
                     /Users/klaus/git/PL1-2014/lecturenotes/10-gc.html
                 </a>
                 
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/11-syntacticvsmeta.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/11-syntacticvsmeta.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/12-churchencoding.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/12-churchencoding.html
+                </a>
+                
             </div>
         </div>
     </div>
@@ -411,7 +419,7 @@ def nextAddress : Address = {
   case f@Fun(_, _) =&gt; (ClosureV(f, env), s)
   /* In recursive cases we have to thread the store through the
    * evaluation. In particular, we define the order of evaluation
-   * explicitly through data flow dependencies.
+   * explicitly through data flow dependencies.  */
   case If0(cond, thenExp, elseExp)
     =&gt; eval(cond, env, s) match {
          case (NumV(0), s1) =&gt; eval(thenExp, env, s1)
@@ -421,8 +429,6 @@ def nextAddress : Address = {
           * the conditional expression:
 
          case (NumV(_), s1) =&gt; eval(elseExp, env, s1)
-         case _             =&gt; sys.error(&quot;can only test if a number is 0&quot;)
-
        }
 
   case Add(l, r)
@@ -457,11 +463,11 @@ def nextAddress : Address = {
        }
 
   /* In a sequence, we ignore the result of evaluating e1 but not its
-   * effect on the store.
+   * effect on the store. */
   case Seq(e1, e2) =&gt; eval(e2, env, eval(e1, env, s)._2)
 
   /* A new box is created by putting it into the store at a new
-   * address.
+   * address.  */
   case NewBox(e: Exp)
     =&gt; eval(e, env, s) match {
          case (v, s1) =&gt; {
@@ -472,7 +478,7 @@ def nextAddress : Address = {
 
   /* Setting a box is now a two-step process: First evaluate b to an
    * address, then lookup and update the value associated to the
-   * address in the store. Note that &quot;updated&quot; is a functional method.
+   * address in the store. Note that &quot;updated&quot; is a functional method.  */
   case SetBox(b: Exp, e: Exp)
     =&gt; eval(b, env, s) match {
          case (AddressV(a), s1)
@@ -483,7 +489,7 @@ def nextAddress : Address = {
        }
 
   /* OpenBox uses the same two-step process but does not update the
-   * store.
+   * store.  */
   case OpenBox(b: Exp)
     =&gt; eval(b, env, s) match {
          case (AddressV(a), s1) =&gt; (s1(a), s1)
@@ -537,8 +543,6 @@ val teststore = Map(
 /*
 
 10 -&gt; 8 -&gt; 6
-
-      9 -&gt; 7
 
 
 assert(gc(Map('a -&gt; AddressV(10)), teststore) == teststore - 7 - 9)
