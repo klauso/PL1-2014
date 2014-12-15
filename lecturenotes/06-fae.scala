@@ -145,7 +145,8 @@ def eval(e: Exp) : Exp = e match {
                      case _ => sys.error("can only add numbers")
                     }
   case App(f,a) => eval(f) match {
-     case Fun(x,body) => eval( subst(body,x, eval(a)))
+     case Fun(x,body) => eval( subst(body,x, eval(a)))  // call-by-value
+     case Fun(x,body) => eval( subst(body,x, a))        // call-by-name
      case _ => sys.error("can only apply functions")
   }
   case _ => e // numbers and functions evaluate to themselves

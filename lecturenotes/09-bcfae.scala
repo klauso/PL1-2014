@@ -145,8 +145,7 @@ def eval(e: Exp, env: Env, s: Store) : (Value, Store) = e match {
   case f@Fun(_, _) => (ClosureV(f, env), s)
   /* In recursive cases we have to thread the store through the
    * evaluation. In particular, we define the order of evaluation
-   * explicitly through data flow dependencies.
-   */
+   * explicitly through data flow dependencies.  */
   case If0(cond, thenExp, elseExp)
     => eval(cond, env, s) match {
          case (NumV(0), s1) => eval(thenExp, env, s1)
@@ -156,9 +155,7 @@ def eval(e: Exp, env: Env, s: Store) : (Value, Store) = e match {
           * the conditional expression:
 
          case (NumV(_), s1) => eval(elseExp, env, s1)
-         case _             => sys.error("can only test if a number is 0")
-
-          */
+         case _             => sys.error("can only test if a number is 0") */
        }
 
   case Add(l, r)
@@ -193,13 +190,11 @@ def eval(e: Exp, env: Env, s: Store) : (Value, Store) = e match {
        }
 
   /* In a sequence, we ignore the result of evaluating e1 but not its
-   * effect on the store.
-   */
+   * effect on the store. */
   case Seq(e1, e2) => eval(e2, env, eval(e1, env, s)._2)
 
   /* A new box is created by putting it into the store at a new
-   * address.
-   */
+   * address.  */
   case NewBox(e: Exp)
     => eval(e, env, s) match {
          case (v, s1) => {
@@ -210,8 +205,7 @@ def eval(e: Exp, env: Env, s: Store) : (Value, Store) = e match {
 
   /* Setting a box is now a two-step process: First evaluate b to an
    * address, then lookup and update the value associated to the
-   * address in the store. Note that "updated" is a functional method.
-   */
+   * address in the store. Note that "updated" is a functional method.  */
   case SetBox(b: Exp, e: Exp)
     => eval(b, env, s) match {
          case (AddressV(a), s1)
@@ -222,8 +216,7 @@ def eval(e: Exp, env: Env, s: Store) : (Value, Store) = e match {
        }
 
   /* OpenBox uses the same two-step process but does not update the
-   * store.
-   */
+   * store.  */
   case OpenBox(b: Exp)
     => eval(b, env, s) match {
          case (AddressV(a), s1) => (s1(a), s1)
@@ -270,9 +263,7 @@ val teststore = Map(
 
 10 -> 8 -> 6
 
-      9 -> 7
-
-*/
+      9 -> 7        */
 
 assert(gc(Map('a -> AddressV(10)), teststore) == teststore - 7 - 9)
 

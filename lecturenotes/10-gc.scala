@@ -188,8 +188,7 @@ class MarkAndSweepStore(size: Int) extends Store {
      * If we ensure the invariant that the variable `free` has always
      * the number of free memory space, then the following loop will
      * always halt. The nontermination situation will generate an out-
-     * of-memory error and the program will abort.
-     */
+     * of-memory error and the program will abort. */
 
     while (memory(nextFreeAddr) != null) {
       nextFreeAddr += 1
@@ -225,8 +224,7 @@ class MarkAndSweepStore(size: Int) extends Store {
   }
 
   /* What graph algorithm underlies the mark step as implemented here?
-   * What potential problem it could cause in a "real" interpreter?
-   */
+   * What potential problem it could cause in a "real" interpreter? */
 
   def sweep() : Unit = {
     memory.indices.foreach(
