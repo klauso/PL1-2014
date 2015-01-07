@@ -28,6 +28,7 @@ Schedule
  * December 2 & 4. Lecture: Mutation and Garbage Collection
  * December 8. Exercise: Mutable Variables vs. Boxes
  * December 9. Guest Lecture by Karl Klose on the Dart to Javascript compiler
+ * December 16. Lecture: [Programming in Continuation-Passing Style](lecturenotes/13-continuations-1.scala)
 
 Homework
 --------
