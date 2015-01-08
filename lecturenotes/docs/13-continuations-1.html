@@ -1208,6 +1208,113 @@ The sum is 42.
 <p>Our understanding of these properties will help us to formalize
 <br  />the transformation of arbitrary FAE programs into
 <br  />continuation-passing style in the next lecture.</p>
+<h2>Three steps for transforming into CPS by hand</h2>
+<p>At some point in the lecture today, we transformed
+<br  /><code>Desktop.program</code> to CPS. We ended up with <code>CPS.variant2</code>. Let's
+<br  />look again at how we can transform an arbitrary piece of code
+<br  />into continuation-passing style, by hand. We do this in the
+<br  />following three steps:</p>
+<ol>
+<li>give a name to the result of every nontrivial subexpression.</li>
+<li>choose an evaluation order for the nontrivial subexpressions.</li>
+<li>use continuations instead of helper variables</li>
+</ol>
+<p>Here is the transformation we have seen before, using these three
+<br  />steps. We start with:</p>
+<pre><code>def program() {
+  println("The sum is " +
+    (inputNumber("First number") +
+      inputNumber("Second number")) +
+    ".")
+}
+</code></pre>
+<p>In the first step, we assign the following names to the subexpressions:</p>
+<ul>
+<li>firstNumber = inputNumber(&ldquo;First number&rdquo;)</li>
+<li>secondNumber = inputNumber(&ldquo;Second number&rdquo;)</li>
+</ul>
+<p>Here, we treat the + operator as trivial. We could also treat it
+<br  />as non-trivial and give names to subexpressions involving the +
+<br  />operator. Then we would have to CPS-transform also the
+<br  />implementation of +. We will talk about the difference between
+<br  />trivial and nontrivial expressions more in the next lecture.</p>
+<p>In the second step, we choose an evaluation order. Let's choose
+<br  />to compute firstNumber first, and secondNumber second. After this
+<br  />step, we rewrite the program as follows:</p>
+<pre><code>def program() {
+  val firstNumber = inputNumber("First number")
+  val secondNumber = inputNumber("Second number")
+  println("The sum is " +
+    (firstNumber +
+      secondNumber) +
+    ".")
+}
+</code></pre>
+<p>In the third step, we add an continuation argument to program,
+<br  />call that continuation instead of returning a result, and we
+<br  />rewrite</p>
+<pre><code>val name = function(args)
+rest
+</code></pre>
+<p>to</p>
+<pre><code>function(args, name =&gt;
+  rest).
+</code></pre>
+<p>In this case, we get the following program, which is in
+<br  />continuation-passing style:</p>
+<pre><code>def program(k: Int =&gt; Unit) {
+  inputNumber("First number", firstNumber =&gt;
+    inputNumber("Second number", secondNumber =&gt;
+      println("The sum is " +
+        (firstNumber +
+          secondNumber) +
+        ".")))
+}
+</code></pre>
+<p>Note that in this step, we assume that inputNumber has also been
+<br  />transformed to continuation-passing style. So we have to apply
+<br  />the three steps to every function in our program.</p>
+<h2>Another example: fibonacci numbers</h2>
+<p>Here is another simple example for how to transform into CPS
+<br  />manually: The good old fibonacci function. We start with:</p>
+<pre><code>def fibonacci(n: Int): Int =
+  if (n &lt; 2)
+    1
+  else
+    fibonacci(n - 1) + fibonacci(n - 2)
+</code></pre>
+<p>In the first step, we give names to every nontrivial
+<br  />subexpression:</p>
+<ul>
+<li>a = fibonacci(n - 1)</li>
+<li>b = fibonacci(n - 2)</li>
+</ul>
+<p>In the second step, we choose an evaluation order for the
+<br  />nontrivial subexpressions. The usual choice would be to evaluate
+<br  />a first, and then b. But in continuation-passing style, we can
+<br  />also choose to evaluate b first, and then a. After all, with
+<br  />continuations, we are more flexible in what we want to evaluate
+<br  />when. Let's choose that unusual evaluation order:</p>
+<pre><code>def fibonacci(n: Int): Int =
+  if (n &lt; 2)
+    1
+  else {
+    val b = fibonacci(n - 2)
+    val a = fibonacci(n - 1)
+    a + b
+  }
+</code></pre>
+<p>In the third step, we add a continuation argument and use
+<br  />continuations everywhere:</p>
+<pre><code>def fibonacci(n: Int, k: Int =&gt; Unit) {
+  if (n &lt; 2)
+    k(1)
+  else
+    fibonacci(n - 2, b =&gt;
+      fibonacci(n - 1, a =&gt;
+        k(a + b)))
+}
+</code></pre>
 
             </td></tr><tr>
             <td class="code">

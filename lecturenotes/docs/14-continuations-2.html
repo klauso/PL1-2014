@@ -234,18 +234,76 @@
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_0">&#182;</a>
                 </div>
-                
+                <h1>Automatic Transformation into CPS</h1>
+<p>In the previous lecture, we learned about continuation-passing
+<br  />style (CPS), how it allows to treat execution order as a
+<br  />first-class concept, and how to manually transform a program into
+<br  />it. Today, we want to write an automatic transformation from an
+<br  />FAE program in direct style into the equivalent program in
+<br  />continuation-passing style. On the way, we will also learn how to
+<br  />use the Scala type system to help us encode the specification of
+<br  />a transformation like this.</p>
+
             </td></tr><tr>
             <td class="code">
                 <pre><code class='prettyprint lang-scala'>object transform {
 
-  // Let's encode the three properties of programs in CPS in the
-  // Scala type system. This will help us to get the
-  // transformation right.
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <p>Precise typing</p>
+<hr />
+<p>The transformation will be a Scala method that pattern matches
+<br  />on FAE expressions, and creates other FAE expressions. The
+<br  />signature of that method could be:</p>
+<pre><code>  def cps(exp: Exp): Exp
+</code></pre>
+<p>Of course, the idea would be that <code>cps</code> always returns
+<br  />expressions in continuation-passing style. To ensure that we
+<br  />get the implementation of <code>cps</code> right, we would have to write a
+<br  />test suite, or make a proof, or at least think hard about
+<br  />whether our implement is correct. Instead of going this route,
+<br  />we are going to define a set of case classes that exactly
+<br  />encode FAE programs in CPS but no other FAE programs. We can
+<br  />then use a signature such as the following for the
+<br  />transformation:</p>
+<pre><code>  def cps(exp: Exp): ContExp
+</code></pre>
+<p>The benefit will be that when we implement <code>cps</code>, the Scala
+<br  />typechecker will ensure that we actually return an expression
+<br  />in CPS, because all values of the type <code>ContExp</code> represent
+<br  />expressions in CPS.</p>
+<p>Source, target, and meta language</p>
+<hr />
+<p>When we think about a transformation between languages, it
+<br  />helps to use different words for the different languages
+<br  />involved:</p>
+<pre><code>- The *source language* is the language the input to the
+  transformation is written in. In the lecture today, the
+  source language is FAE.
 
-  // Arbitrary expressions:
+- The *target language* is the language the output of the
+  transformation is written in. In the lecture today, the
+  target language is FAE in continuation-passing style.
 
-  sealed abstract class Exp
+- The *meta language* is the language the transformation
+  itself is written in. In the lecture today, the meta
+  language is Scala.
+</code></pre>
+<p>The source language</p>
+<hr />
+<p>Our source language is simply FAE, as defined in a previous
+<br  />lecture. We copy the relevant definitions here:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  sealed abstract class Exp
   case class Num(n: Int) extends Exp
   case class Id(name: Symbol) extends Exp
   case class Add(lhs: Exp, rhs: Exp) extends Exp
@@ -255,53 +313,265 @@
   case class Fun(param: Symbol, body: Exp) extends Exp
   case class App (funExpr: Exp, argExpr: Exp) extends Exp
 
-  // Expressions in CPS:
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>Target language</p>
+<hr />
+<p>The target language should be the subset of the source language
+<br  />that is in continuation-passing style, that is, the subset
+<br  />where programs have the three properties from the previous
+<br  />lecture:</p>
+<pre><code>1. All calls are in tail position.
+2. All functions take continuation arguments.
+3. No function returns a value.
+</code></pre>
+<p>To be able to formalize these properties in the Scala
+<br  />typesystem, we reformulate them using the terms &ldquo;non-trivial
+<br  />expression&rdquo; and &ldquo;trivial expression&rdquo; that we already used
+<br  />informally in the previous lecture.  Now it is time to define
+<br  />them more formally:</p>
+<pre><code>- An expression is *non-trivial* if evaluating it might take
+  a long time, multiple steps, or might not
+  terminate. Example: Function calls.
 
-  sealed abstract class ContExp
+- An expression is *trivial* if evaluating it is sure to be
+  instantaneous and always succeeds. Example: Integer
+  literals.
+</code></pre>
+<p>In CPS, trivial subexpressions will be left alone. In
+<br  />particular, they will still return values. But every nontrivial
+<br  />subexpressions needs to be changed so that it accepts and calls
+<br  />a continuation instead of returning a value. So we can
+<br  />reformulate the three properties of programs in
+<br  />continuation-passing style as follows:</p>
+<ol>
+<li><p>All non-trivial expressions are in tail position.</p>
+</li>
+<li><p>All functions take continuation arguments.</p>
+</li>
+<li><p>No trivial expressions are in tail position.</p>
+<p>Note how the third property used to be semantic (what happens
+<br  />at run time) and became syntactic (how programs look like). The
+<br  />two versions of the third property still mean the same thing:
+<br  />Only trivial expressions evaluate to values, but they cannot
+<br  />appear in tail position, so the last thing a function does can
+<br  />never be to return a value. The good thing about this more
+<br  />syntactic reformulation is that we can encode it into the
+<br  />syntax of the target language, that is, into the case classes
+<br  />that we use to represent target language programs.</p>
+<h2>Trivial and nontrivial expression in the target language</h2>
+<p>We start by saying that an expression in continuation-passing
+<br  />style is either trivial or nontrivial:</p>
+</li>
+</ol>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  sealed abstract class ContExp
   sealed abstract class TrivialContExp extends ContExp
   sealed abstract class NontrivialContExp extends ContExp
 
-  case class ContNum(n: Int) extends TrivialContExp
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>No we go through the five case classes of FAE and decide
+<br  />whether they are trivial or nontrivial, and what there
+<br  />subexpressions are.</p>
+<p>We start with numeric literals. They are the paradigmatic
+<br  />example of trivial expressions, so we let <code>ContNum</code> extend
+<br  /><code>TrivialContExp</code>:</p>
 
-  case class ContId(name: Symbol) extends TrivialContExp
-  // ContId would be NontrivialContExp if call-by-name
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  case class ContNum(n: Int) extends TrivialContExp
 
-  case class ContAdd(lhs: TrivialContExp, rhs: TrivialContExp)
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
+                </div>
+                <p>Next we look at identifier occurrences. Since we are in a
+<br  />call-by-value setting, evaluating an identifier is
+<br  />instantaneous and always terminates. We therefore classify
+<br  />identifier occurrences as trivial. In a call-by-name or
+<br  />call-by-need setting, we would have to treat them as nontrivial
+<br  />instead!</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  case class ContId(name: Symbol) extends TrivialContExp
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_5">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_5">&#182;</a>
+                </div>
+                <p>Now we consider addition. Evaluating an addition expression
+<br  />only takes a single step, so we treat them as trivial and let
+<br  /><code>ContAdd</code> extend <code>TrivialContExp</code>.</p>
+<p>Evaluation of <code>ContAdd</code> will work by evaluating the
+<br  />subexpressions first, and then doing the addition. So neither
+<br  />of the subexpressions is in tail positions, so they have to be
+<br  />trivial, by the third property of programs in CPS. We therefore
+<br  />use <code>TrivialContExp</code> for both <code>lhs</code> and <code>rhs</code>.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  case class ContAdd(lhs: TrivialContExp, rhs: TrivialContExp)
       extends TrivialContExp
+
   // can also decide to ContAdd(...) extends NontrivialContExp
   // TODO explain how to deal with nontrivial adds and 2nd req.
 
-  // lhs and rhs *have to be* TrivialContExp because they are
-  // not in tail position!
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_6">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_6">&#182;</a>
+                </div>
+                <p>The usual implicit conversions, for convenience:</p>
 
-  implicit def num2contexp(n: Int) = ContNum(n)
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  implicit def num2contexp(n: Int) = ContNum(n)
   implicit def id2contexp(s: Symbol) = ContId(s)
-   
-  case class ContApp(funExpr: TrivialContExp,
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_7">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_7">&#182;</a>
+                </div>
+                <p>Next we have to think about application. Evaluating an
+<br  />application means evaluating the subexpressions first and then
+<br  />calling the function. So the subexpressions are not in tail
+<br  />position and therefore have to be trivial by the third property
+<br  />of programs in CPS. We therefore use <code>TrivalContExp</code> for
+<br  /><code>funExpr</code> and <code>argExpr</code>.</p>
+<p>By the second property of programs in CPS, all functions take
+<br  />continuations as additional argument. So we also have to
+<br  />provide a continuation in every function call. To ensure we
+<br  />don't forget these continuation arguments, we add a field of
+<br  />type <code>Continuation</code> to the <code>ContApp</code> case class. The type
+<br  /><code>Continuation</code> will be defined below.</p>
+<p>Finally, evaluating an application might take multiple steps or
+<br  />a long term or might not even terminate, depending on what
+<br  />happens inside the called function. We therefore classify
+<br  />applications as nontrivial, and let <code>ContApp</code> extend
+<br  /><code>NontrivialContExp</code>.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  case class ContApp(funExpr: TrivialContExp,
                      argExpr: TrivialContExp,
                      cont: Continuation)
       extends NontrivialContExp
 
-  // funExpr and argExpr *have to be* trivial because they
-  // are not in tail position
 
-  case class ContFun(param: Symbol,
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_8">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_8">&#182;</a>
+                </div>
+                <p>Finally, we think about functions. The body of a function is in
+<br  />tail position, so it has to be nontrivial by the third property
+<br  />of programs in CPS. Accordingly, we choose <code>body:
+&lt;br /&gt;NontrivialContExp</code>.</p>
+<p>By the second property of programs in CPS, all functions take
+<br  />continuations as additional argument. We add a field of type
+<br  /><code>Symbol</code> to hold the name of the continuation parameter.</p>
+<p>Function expressions itself are instantaneously evaluated to
+<br  />closures, so they are trivial, and we let <code>ContFun</code> extend
+<br  /><code>TrivialContExp</code>.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  case class ContFun(param: Symbol,
                      contParam: Symbol,
                      body: NontrivialContExp)
       extends TrivialContExp
 
-  // sometimes subexpressions can be nontrivial, for example:
-  //
-  // case class If(condExpr: trivial,
-  //               thenBranch: nontrivial,
-  //               elseBranch: nontrivial)
-  //   extends Nontrivial
 
-  // We also need continuations!
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_9">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_9">&#182;</a>
+                </div>
+                <p>In the examples above, subexpressions were usually required to
+<br  />be trivial. But sometimes, subexpressions can be required to be
+<br  />nontrivial, for example:</p>
+<pre><code>  case class If(condExpr: TrivialContExp,
+                thenBranch: NontrivialContExp,
+                elseBranch: NontrivialContExp)
+    extends NontrivialContExp
+</code></pre>
+<p>By the first and third property of programs in CPS, whether a
+<br  />subexpression needs to trivial or nontrivial depends on whether
+<br  />it is in tail position or not.</p>
+<p>Continuations in the target language</p>
+<hr />
+<p>Now in addition to trivial and nontrivial expressions, we also
+<br  />need continuations in our target language. We already used the
+<br  />type <code>Continuation</code> once above, in the type of a field of
+<br  /><code>ContApp</code>.</p>
 
-  sealed abstract class Continuation extends ContExp
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  sealed abstract class Continuation extends ContExp
 
-  case class FunContinuation(
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_10">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_10">&#182;</a>
+                </div>
+                <p>There are two kinds of continuations in the target language:
+<br  />Names of continuation arguments, and anonymous continuations
+<br  />constructed by function expressions. The body of an anonymous
+<br  />continuation has to be a nontrivial expression, since it is in
+<br  />tail position.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  case class FunContinuation(
     param: Symbol,
     body: NontrivialContExp)
       extends Continuation
@@ -312,22 +582,68 @@
 
   implicit def id2cont(name: Symbol) = IdContinuation(name)
 
-  case class AppContinuation(
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_11">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_11">&#182;</a>
+                </div>
+                <p>Finally, we also need to be able to <em>call</em> a
+<br  />continuation. Since we don't know what the continuation will
+<br  />do, calling a continuation is a nontrivial expression. And
+<br  />since we first evaluate the continuation's argument and then
+<br  />call the continuation, the argument is not in tail position and
+<br  />therefore needs to be a trivial expression.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  case class AppContinuation(
     cont: Continuation,
     arg: TrivialContExp)
       extends NontrivialContExp
 
-  // We need to generate fresh names
-  var counter: Int = 0
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_12">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_12">&#182;</a>
+                </div>
+                <p>Fresh names</p>
+<hr />
+<p>To avoid name clashes, we need to generate fresh names all the
+<br  />time.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  var counter: Int = 0
   def freshName(name: String) = {
     counter += 1
     Symbol(name + &quot;_&quot; + counter)
   }
 
-  // Ok, now we can write a transformation of arbitrary
-  // expressions into non-trivial expressions in CPS.
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_13">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_13">&#182;</a>
+                </div>
+                <p>The Transformation</p>
+<hr />
+<p>Ok, now we can write a transformation of arbitrary
+<br  />expressions into non-trivial expressions in CPS.</p>
 
-  def cps(e: Exp, k: Continuation): NontrivialContExp =
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>  def cps(e: Exp, k: Continuation): NontrivialContExp =
     e match {
       case Num(n) =&gt; AppContinuation(k, ContNum(n))
       case Id(name) =&gt; AppContinuation(k, ContId(name))
@@ -357,7 +673,23 @@
           cps(argExpr, FunContinuation('a,
             ContApp('f, 'a, k)))))
     }
-}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_14">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_14">&#182;</a>
+                </div>
+                <p>Note how the Scala type checker helps us get this right by
+<br  />ensuring that we don't forget any continuation arguments or mix
+<br  />up trivial and nontrivial expressions.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>}
 
 import transform._
 
