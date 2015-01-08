@@ -730,4 +730,125 @@ return of the value-returning function.
 Our understanding of these properties will help us to formalize
 the transformation of arbitrary FAE programs into
 continuation-passing style in the next lecture.
+
+Three steps for transforming into CPS by hand
+---------------------------------------------
+
+At some point in the lecture today, we transformed
+`Desktop.program` to CPS. We ended up with `CPS.variant2`. Let's
+look again at how we can transform an arbitrary piece of code
+into continuation-passing style, by hand. We do this in the
+following three steps:
+
+ 1. give a name to the result of every nontrivial subexpression.
+ 2. choose an evaluation order for the nontrivial subexpressions.
+ 3. use continuations instead of helper variables
+
+Here is the transformation we have seen before, using these three
+steps. We start with:
+
+    def program() {
+      println("The sum is " +
+        (inputNumber("First number") +
+          inputNumber("Second number")) +
+        ".")
+    }
+
+In the first step, we assign the following names to the subexpressions:
+
+ - firstNumber = inputNumber("First number")
+ - secondNumber = inputNumber("Second number")
+
+Here, we treat the + operator as trivial. We could also treat it
+as non-trivial and give names to subexpressions involving the +
+operator. Then we would have to CPS-transform also the
+implementation of +. We will talk about the difference between
+trivial and nontrivial expressions more in the next lecture.
+
+In the second step, we choose an evaluation order. Let's choose
+to compute firstNumber first, and secondNumber second. After this
+step, we rewrite the program as follows:
+
+    def program() {
+      val firstNumber = inputNumber("First number")
+      val secondNumber = inputNumber("Second number")
+      println("The sum is " +
+        (firstNumber +
+          secondNumber) +
+        ".")
+    }
+
+In the third step, we add an continuation argument to program,
+call that continuation instead of returning a result, and we
+rewrite
+
+    val name = function(args)
+    rest
+
+to
+
+    function(args, name =>
+      rest).
+
+In this case, we get the following program, which is in
+continuation-passing style:
+
+    def program(k: Int => Unit) {
+      inputNumber("First number", firstNumber =>
+        inputNumber("Second number", secondNumber =>
+          println("The sum is " +
+            (firstNumber +
+              secondNumber) +
+            ".")))
+    }
+
+Note that in this step, we assume that inputNumber has also been
+transformed to continuation-passing style. So we have to apply
+the three steps to every function in our program.
+
+Another example: fibonacci numbers
+----------------------------------
+
+Here is another simple example for how to transform into CPS
+manually: The good old fibonacci function. We start with:
+
+    def fibonacci(n: Int): Int =
+      if (n < 2)
+        1
+      else
+        fibonacci(n - 1) + fibonacci(n - 2)
+
+In the first step, we give names to every nontrivial
+subexpression:
+
+  - a = fibonacci(n - 1)
+  - b = fibonacci(n - 2)
+
+In the second step, we choose an evaluation order for the
+nontrivial subexpressions. The usual choice would be to evaluate
+a first, and then b. But in continuation-passing style, we can
+also choose to evaluate b first, and then a. After all, with
+continuations, we are more flexible in what we want to evaluate
+when. Let's choose that unusual evaluation order:
+
+    def fibonacci(n: Int): Int =
+      if (n < 2)
+        1
+      else {
+        val b = fibonacci(n - 2)
+        val a = fibonacci(n - 1)
+        a + b
+      }
+
+In the third step, we add a continuation argument and use
+continuations everywhere:
+
+    def fibonacci(n: Int, k: Int => Unit) {
+      if (n < 2)
+        k(1)
+      else
+        fibonacci(n - 2, b =>
+          fibonacci(n - 1, a =>
+            k(a + b)))
+    }
 */
