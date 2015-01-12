@@ -96,13 +96,19 @@ def eval_k(e: Exp, env_k: Env_K, k: Int => Nothing) : Nothing =
 // Put "pl1-hw06" in subject, please
 //
 //  1. Transform the expression f(f(3) + f(4)) into CPS
-//  2. Transform the following function into CPS:
+//  2. Transform the following program into CPS:
 
-def all(list: List[Int], f: Int => Bool): Bool =
-  if (list.isEmpty())
+def all(f: Int => Boolean, list: List[Int]): Boolean =
+  if (list.isEmpty) {
     true
-  else
-    f(first) && all(rest, f)
+  } else {
+    f(list.head) && all(f, list.tail)
+  }
+
+val even = (number: Int) => number % 2 == 0
+
+assert(all(even, List(2, 4, 6, 8, 10)))
+assert(!(all(even, List(2, 4, 7, 8, 10))))
 
 // 3. Change eval_k to short-circuit multiplications
 //    if the first factor is 0.
