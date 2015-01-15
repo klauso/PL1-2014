@@ -29,6 +29,9 @@ Schedule
  * December 8. Exercise: Mutable Variables vs. Boxes
  * December 9. Guest Lecture by Karl Klose on the Dart to Javascript compiler
  * December 16. Lecture: [Programming in Continuation-Passing Style](lecturenotes/13-continuations-1.scala)
+ * December 18. Lecture: [Automatic CPS Transformation](lecturenotes/14-continuations-2.scala)
+ * January 8. Lecture: First-class Continuations
+ * January 12. Exercise: [Manual CPS Transformation](exercises/cps.scala)
 
 Homework
 --------
@@ -45,3 +48,5 @@ You have to hand in reasonable homework for all but one assignment to attend the
    assignment in [exercises/hw-cbn.scala](exercises/hw-cbn.scala)
  * Hand in before Monday morning, December 15:
    assignment in [exercises/hw-mutation.scala](exercises/hw-mutation.scala)
+ * Hand in before Monday morning, January 19:
+   assignments at the end of [exercises/cps.scala](exercises/cps.scala)
