@@ -73,7 +73,7 @@ def typeCheck(e: Exp) : Type = e match {
     case _ => sys.error("Type Error in addition")
   }
   case If(c,t,e) => (typeCheck(c), typeCheck(t), typeCheck(e)) match {
-    case (BoolType(),t1,t2) => if (t1 == t2) then t1 else sys.error("type error in if")
+    case (BoolType(),t1,t2) => if (t1 == t2) t1 else sys.error("type error in if")
     case _ => sys.error("Type error in If")
   }
 }

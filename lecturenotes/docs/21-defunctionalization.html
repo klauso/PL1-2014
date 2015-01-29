@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>17-firstclasscontinuations.scala</title>
+    <title>21-defunctionalization.scala</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <style type="text/css">
         /*--------------------- Layout and Typography ----------------------------*/
@@ -242,7 +242,7 @@
         <thead>
         <tr>
             <th class="docs">
-                <h1>17-firstclasscontinuations.scala</h1>
+                <h1>21-defunctionalization.scala</h1>
             </th>
             <th class="code"></th>
         </tr>
@@ -254,19 +254,47 @@
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_0">&#182;</a>
                 </div>
-                <h1>First-Class Continuations</h1>
-<p>Today's goal is to formalize first-class continuations as illustrated by Scheme's let/cc construct. In the previous lecture we have learned why first class continuations are a powerful language construct. Today we learn the semantics of first-class continuations by extending our interpreter to support letcc. Here is the abstract syntax of the language we want to extend:</p>
+                <h1>Defunctionalization</h1>
+<p>The material in these notes is based on: John C. Reynolds: Definitional Interpreters for Higher-Order Programming Languages.  Higher-Order and Symbolic Computation 11(4): 363-397 (1998)</p>
+<p>In the discussion of syntactic interpretation vs meta interpretation we have learned that we only learn something about (and control) a language feature if we choose syntactic interpretation.</p>
+<p>Today we want to discuss techniques with which we can make our interpreter so syntactic that it corresponds to an abstract machine: A machine with a (possibly infinite) set of states and a simple transition relation between the states. We already know the technique with which we can take control over the call stack management: CPS transformation. After CPS-transforming the interpreter, we do not rely on the order of evaluation and call stack management of the meta language anymore.  We replicate its definition here:</p>
 
             </td></tr><tr>
             <td class="code">
                 <pre><code class='prettyprint lang-scala'>sealed abstract class Exp
-case class Num(n: Int) extends Exp
-case class Id(name: Symbol) extends Exp
-case class Add(lhs: Exp, rhs: Exp) extends Exp
-case class Fun(param: Symbol, body: Exp) extends Exp
-implicit def num2exp(n: Int) = Num(n)
-implicit def id2exp(s: Symbol) = Id(s)
-case class App (funExpr: Exp, argExpr: Exp) extends Exp
+case class Num(n : Int) extends Exp
+case class Id(name : Symbol) extends Exp
+case class Add(lhs : Exp, rhs : Exp) extends Exp
+case class Fun(param : Symbol, body : Exp) extends Exp
+case class App (funExpr : Exp, argExpr : Exp) extends Exp
+
+sealed abstract class Value
+type Env = Map[Symbol, Value]
+case class NumV(n : Int) extends Value
+case class ClosureV(f : Fun, env : Env) extends Value
+
+object CPSTransformed {
+  def eval[T](e : Exp, env : Env, k : Value =&gt; T) : T = e match {
+    case Num(n : Int) =&gt; k(NumV(n))
+    case Id(x) =&gt; k(env(x))
+    case Add(l, r) =&gt;
+      eval( l, env
+          , lv =&gt; eval( r, env
+                      , rv =&gt; (lv, rv) match {
+                          case (NumV(v1), NumV(v2)) =&gt; k(NumV(v1 + v2))
+                          case _ =&gt; sys.error(&quot;can only add numbers&quot;)
+                        } ) )
+    case f@Fun(param, body) =&gt; k(ClosureV(f, env))
+    case App(f, a) =&gt;
+      eval( f, env
+          , cl =&gt; cl match {
+              case ClosureV(f, closureEnv) =&gt;
+                eval( a, env
+                    , av =&gt; eval(f.body, closureEnv + (f.param -&gt; av), k) )
+              case _ =&gt; sys.error(&quot;can only apply functions&quot;)
+            } )
+  }
+}
 
 </code></pre>
             </td>
@@ -277,11 +305,33 @@ case class App (funExpr: Exp, argExpr: Exp) extends Exp
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_1">&#182;</a>
                 </div>
-                <p>The abstract syntax of Letcc is as follows:</p>
+                <p>However, the CPS-transformed interpreter still uses high-level features of the meta-language, most notably first-class functions. We will now introduce one transformation that can be used to transform a function using higher-order functions into one using only first-order functions.  It is general program transformation technique, not restricted only to interpreters.</p>
+<h2>Lambda Lifting</h2>
+<p>The first of these techniques is <em>lambda lifting</em>.  The goal of lambda lifting is to turn local functions into top-level functions.  That is, all &ldquo;lambdas&rdquo; only occur at the top-level.  Variables in the local environment that are normally stored in the function's closure are instead passed as parameters to the top-level function. Lambda lifting is accomplished by the following steps:</p>
+<ol>
+<li>Invent a new and unique name for each function that is not a top-level function.</li>
+<li>Create a function with this name. Its body is the body of the former local function.  Such a function will contain free variables.  3) Add a parameter to so-obtained top-level function for each free variable in its body.  Thus it becomes a higher-order function that returns a function when passed these arguments.  4) Replace the local function by a call to the new top-level function and pass the corresponding local context via the arguments created in step 3.</li>
+</ol>
+<p>Example: Let's lambda-lift the functions <code>y =&gt; y + n</code> and <code>y =&gt; y*n</code> in</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>case class Letcc(param: Symbol, body: Exp) extends Exp
+                <pre><code class='prettyprint lang-scala'>def map(f : Int =&gt; Int, xs : List[Int]) : List[Int] = xs match {
+  case Nil =&gt; Nil
+  case (x :: xs) =&gt; f(x) :: map(f, xs)
+}
+
+def addAndMultNToList(n : Int, xs : List[Int]) = map(y =&gt; y * n, map(y =&gt; y + n, xs)) 
+
+/* We create two new top-level functions. Let's call them `f' and `g' Their bodies are respectively `y =&gt; y + n' and `y =&gt; yn'. We add a parameter for each free variable. In the example, the free variable is `n' in both cases:
+
+def f(n : Int) = (y : Int) =&gt; y + n
+def g(n : Int) = (y : Int) =&gt; y * n
+
+/* or shorter: */
+
+def f(n : Int)(y : Int) = y + n
+def g(n : Int)(y : Int) = y * n
 
 </code></pre>
             </td>
@@ -292,23 +342,11 @@ case class App (funExpr: Exp, argExpr: Exp) extends Exp
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_2">&#182;</a>
                 </div>
-                <p>But how do we implement letcc? How do we get hold of the rest of the computation of the object (=interpreted) program?</p>
-<p>One idea would be to CPS-transform the object program. Then we have the current continuation available and could store it in environments etc.</p>
-<p>However, we want to give a direct semantics to first-class continuations, without first  transforming the object program.</p>
-<p>Insight: If we would CPS-transform the interpreter, the continuation of the interpreter also represents, in some way, the continuation of the object program. The difference is that it represents what's left to do in the interpreter and not in the object program. However, what is left in the interpreter <em>is</em> what is left in the object program.</p>
-<p>Hence we are faced with two tasks:</p>
-<ol>
-<li>CPS-transform the interpreter</li>
-<li>add a branch for Letcc to the interpreter.</li>
-</ol>
-<p>Let's start with the standard infrastructure of values and environments.</p>
+                <p>The local function can now be replaced by a call to the new global function.</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>sealed abstract class Value
-type Env = Map[Symbol, Value]
-case class NumV(n: Int) extends Value
-case class ClosureV(f: Fun, env: Env) extends Value
+                <pre><code class='prettyprint lang-scala'>def addAndMultNToList(n : Int, xs : List[Int]) = map(g(n), map(f(n), xs)) 
 
 </code></pre>
             </td>
@@ -319,11 +357,34 @@ case class ClosureV(f: Fun, env: Env) extends Value
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_3">&#182;</a>
                 </div>
-                <p>How do we represent values that represent continuations? Since we want to represent an object language continuation by a meta language continuation, we need to be able to wrap a meta language continuation as an object language value. This continuation will always accept some other object language value:</p>
+                <p>Let's now perform the same technique to the CPS-transformed interpreter given above.  It contains local functions in four places: two in the <code>Add' branch and two in the</code>App' branch. We call the corresponding top-level functions, from left to right, <code>addc1',</code>addc2', <code>appc1' and</code>appc2'.
+<br  />An interesting novelty in the interpreter is that some local functions (corresponding to <code>addc1' and</code>appc1') create local functions themselves. This means that <code>addc1' must call</code>addc2' and <code>appc1' must call</code>appc2'. The rest of the transformation is a straightforward application of the transformation steps described above:</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>case class ContV(f: Value =&gt; Nothing) extends Value
+                <pre><code class='prettyprint lang-scala'>object LambdaLifted {
+  def addc1[T](r : Exp, env : Env, k : Value =&gt; T)(lv : Value) = eval(r, env, addc2(lv, k))
+
+  def addc2[T](lv : Value, k : Value =&gt; T)(rv : Value) = (lv, rv) match {
+    case (NumV(v1), NumV(v2)) =&gt; k(NumV(v1 + v2))
+    case _ =&gt; sys.error(&quot;can only add numbers&quot;) 
+  }
+
+  def appc1[T](a : Exp, env : Env, k : Value =&gt; T)(cl : Value) = cl match {
+    case ClosureV(f, closureEnv) =&gt; eval(a, env, appc2(f, closureEnv, k))
+    case _ =&gt; sys.error(&quot;can only apply functions&quot;)
+  }
+
+  def appc2[T](f : Fun, closureEnv : Env, k : Value =&gt; T)(av : Value) = eval(f.body, closureEnv + (f.param -&gt; av), k)
+
+  def eval[T](e : Exp, env : Env, k : Value =&gt; T) : T = e match {
+    case Num(n : Int) =&gt; k(NumV(n))
+    case Id(x) =&gt; k(env(x))
+    case Add(l, r) =&gt; eval(l, env, addc1(r, env, k))
+    case f@Fun(param, body) =&gt; k(ClosureV(f, env))
+    case App(f, a) =&gt; eval(f, env, appc1(a, env, k))
+  }
+}
 
 </code></pre>
             </td>
@@ -334,40 +395,30 @@ case class ClosureV(f: Fun, env: Env) extends Value
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_4">&#182;</a>
                 </div>
-                <p>We also need a syntactic construct to apply continuations. One way to provide such a construct would be to add a new syntactic category of continuation application. We will instead do what Scheme and other languages also do: We overload the normal function applicaton construct and also use it for application of continuations.</p>
-<p>This means that we will need a case distinction in our interpreter whether the function argument is a closure or a continuation.</p>
-<p>Let's now study the interpreter for our new language. The branches for Num, Id, Add, and Fun are straightforward applications of the CPS transformation technique we already know.</p>
+                <p>The lambda-lifted interpreter contains no local functions anymore, but it still contains higher-order functions, since `addc1' etc. return functions that are passed as parameters to other functions.</p>
+<h2>Defunctionalization</h2>
+<p><em>Defunctionalization</em> is a program transformation technique that turns higher-order programs that have already been lambda-lifted into first-order programs that contain no higher-order functions anymore.  Any program contains only finitely many function definitions. The idea of defunctionalization is to assign a unique identifier to each of these function definitions. The function &ldquo;dispatch&rdquo; then happens in a function <code>apply', which receives the identifier corresponding to a function definition and dispatches the identifier to the right function body. Every function application within the program is then replaced by a call to the</code>apply' function with the function identifier as the first argument.</p>
+<p>In addition to the unique identifier, the <code>apply' function also needs bindings for the free variables in the function body. Hence we need to store the values for these free variables along with the unique identifier. Finally, the</code>apply' function needs to know about the argument to the function. These become additional parameters of the `apply' function.</p>
+<p>Let's illustrate defunctionalization in the `addAndMultNToList' example from above.</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>def eval(e: Exp, env: Env, k: Value =&gt; Nothing) : Nothing = e match {
-  case Num(n: Int) =&gt; k(NumV(n))
-  case Id(x) =&gt; k(env(x))
-  case Add(l,r) =&gt; {
-    eval(l,env, lv =&gt; 
-        eval(r,env, rv =&gt;
-          (lv,rv) match {
-            case (NumV(v1), NumV(v2)) =&gt; k(NumV(v1+v2))
-            case _ =&gt; sys.error(&quot;can only add numbers&quot;)
-          }))
-  }
-  case f@Fun(param,body) =&gt; k(ClosureV(f, env))
-  
-  /* In the application case we now need to distinguish whether the first argument
-   * is a closure or a continuation. If it is a continuation, we ignore the
-   * current continuation k and &quot;jump&quot; to the stored continuation by applying the
-   * evaluated continuation argument to it. */
-  case App(f,a) =&gt; eval(f,env, cl =&gt; cl match {
-            case ClosureV(f,closureEnv) =&gt; eval(a,env, av =&gt; eval(f.body, closureEnv + (f.param -&gt; av),k))
-            case ContV(f) =&gt; eval(a,env, av =&gt; f(av))
-            case _ =&gt; sys.error(&quot;can only apply functions&quot;)
-  })
-  /* Letcc is now surprisingly simple: We continue the evaluation in the body in an
-   * extended environment in which param is bound to the current continuation k,
-   * wrapped as a value using ContV. */
-  case Letcc(param,body) =&gt; eval(body, env+(param -&gt; ContV(k)), k)  
+                <pre><code class='prettyprint lang-scala'>sealed abstract class FunctionValue
+case class F(n : Int) extends FunctionValue
+case class G(n : Int) extends FunctionValue
+
+def apply(f : FunctionValue, y : Int) : Int = f match {
+  case F(n) =&gt; y + n
+  case G(n) =&gt; y * n
 }
 
+def map(f : FunctionValue, xs : List[Int]) : List[Int] = xs match {
+  case Nil =&gt; Nil
+  case (x :: xs) =&gt; apply(f, x) :: map(f, xs)
+}
+
+def addAndMultNToList(n : Int, xs : List[Int]) = map(G(n), map(F(n), xs))
+ 
 </code></pre>
             </td>
         </tr>
@@ -377,15 +428,38 @@ case class ClosureV(f: Fun, env: Env) extends Value
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_5">&#182;</a>
                 </div>
-                <p>To make it easier to experiment with the interpreter this code provides the right initialization to eval. We have to give eval a continuation which represents the rest of the computation after eval is done. A small technical problem arises due to our  usage of the return type &ldquo;Nothing&rdquo; for continuations, to emphasize that they do not return: The only way to implement a value that has this type is a function that does indeed not return. We do so by letting this function throw an exception. To keep track of the returned value we store it temporarily in a variable, catch the exception, and return the stored value.</p>
+                <p>Let's now apply defunctionalization to our CPS-transformed interpreter:</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>def starteval(e: Exp) : Value = {
-  var res : Value = null
-  val s : Value =&gt; Nothing = (v) =&gt; { res = v; sys.error(&quot;program terminated&quot;) }
-  try { eval(e, Map.empty, s) } catch { case e:Throwable =&gt; Unit }
-  res
+                <pre><code class='prettyprint lang-scala'>object Defunctionalized {
+
+  sealed abstract class FunctionValue[T]
+  case class AddC1[T](r : Exp, env : Env, k : FunctionValue[T]) extends FunctionValue[T]
+  case class AddC2[T](lv : Value, k : FunctionValue[T]) extends FunctionValue[T]
+  case class AppC1[T](a : Exp, env : Env, k : FunctionValue[T]) extends FunctionValue[T]
+  case class AppC2[T](f : Fun, closureEnv : Env, k : FunctionValue[T]) extends FunctionValue[T]
+
+  def apply[T](fv : FunctionValue[T], v : Value) : T  = fv match {
+    case AddC1(r, env, k) =&gt; eval(r, env, AddC2(v, k))
+    case AddC2(lv, k) =&gt; (lv, v) match {
+      case (NumV(v1), NumV(v2)) =&gt; apply(k, NumV(v1 + v2))
+      case _ =&gt; sys.error(&quot;can only add numbers&quot;) 
+    }
+    case AppC1(a, env, k) =&gt; v match {
+      case ClosureV(f, closureEnv) =&gt; eval(a, env, AppC2(f, closureEnv, k))
+      case _ =&gt; sys.error(&quot;can only apply functions&quot;)
+    }
+    case AppC2(f, closureEnv, k) =&gt; eval(f.body, closureEnv + (f.param -&gt; v), k)
+  }
+
+  def eval[T](e : Exp, env : Env, k : FunctionValue[T]) : T = e match {
+    case Num(n : Int) =&gt; apply(k, NumV(n))
+    case Id(x) =&gt; apply(k, env(x))
+    case Add(l, r) =&gt; eval(l, env, AddC1(r, env, k))
+    case f@Fun(param, body) =&gt; apply(k, ClosureV(f, env))
+    case App(f, a) =&gt; eval(f, env, AppC1(a, env, k))
+  }
 }
 
 </code></pre>
@@ -397,14 +471,14 @@ case class ClosureV(f: Fun, env: Env) extends Value
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_6">&#182;</a>
                 </div>
-                <p>Finally a small test of Letcc.</p>
+                <p>This interpreter can be seen as an abstract machine. The state space of the abstract
+<br  />machine is (Exp x Env x FunctionValue) U (FunctionValue x Value), where &ldquo;x&rdquo; stands for
+<br  />cross product and &ldquo;U&rdquo; stands for set union. Every case in the pattern matches in
+<br  /><code>apply</code> and <code>eval</code> can be read as a transition in this state space.</p>
 
             </td></tr><tr>
             <td class="code">
-                <pre><code class='prettyprint lang-scala'>val testprog = Add(1, Letcc('k, Add(2, App('k, 3))))
-
-assert(starteval(testprog) == NumV(4))
-</code></pre>
+                <pre><code class='prettyprint lang-scala'></code></pre>
             </td>
         </tr>
         
