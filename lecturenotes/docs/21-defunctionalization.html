@@ -323,16 +323,6 @@ object CPSTransformed {
 
 def addAndMultNToList(n : Int, xs : List[Int]) = map(y =&gt; y * n, map(y =&gt; y + n, xs)) 
 
-/* We create two new top-level functions. Let's call them `f' and `g' Their bodies are respectively `y =&gt; y + n' and `y =&gt; yn'. We add a parameter for each free variable. In the example, the free variable is `n' in both cases:
-
-def f(n : Int) = (y : Int) =&gt; y + n
-def g(n : Int) = (y : Int) =&gt; y * n
-
-/* or shorter: */
-
-def f(n : Int)(y : Int) = y + n
-def g(n : Int)(y : Int) = y * n
-
 </code></pre>
             </td>
         </tr>
@@ -341,6 +331,38 @@ def g(n : Int)(y : Int) = y * n
             <td class="docs">
                 <div class="pilwrap">
                     <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>We create two new top-level functions. Let's call them <code>f</code> and <code>g</code> Their bodies are respectively <code>y =&gt; y + n</code> and <code>y =&gt; y * n</code>. We add a parameter for each free variable. In the example, the free variable is <code>n</code> in both cases:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def f(n : Int) = (y : Int) =&gt; y + n
+def g(n : Int) = (y : Int) =&gt; y * n
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <p>or shorter:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def f(n : Int)(y : Int) = y + n
+def g(n : Int)(y : Int) = y * n
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_4">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_4">&#182;</a>
                 </div>
                 <p>The local function can now be replaced by a call to the new global function.</p>
 
@@ -352,13 +374,13 @@ def g(n : Int)(y : Int) = y * n
             </td>
         </tr>
         
-        <tr id="section_3">
+        <tr id="section_5">
             <td class="docs">
                 <div class="pilwrap">
-                    <a class="pilcrow" href="#section_3">&#182;</a>
+                    <a class="pilcrow" href="#section_5">&#182;</a>
                 </div>
-                <p>Let's now perform the same technique to the CPS-transformed interpreter given above.  It contains local functions in four places: two in the <code>Add' branch and two in the</code>App' branch. We call the corresponding top-level functions, from left to right, <code>addc1',</code>addc2', <code>appc1' and</code>appc2'.
-<br  />An interesting novelty in the interpreter is that some local functions (corresponding to <code>addc1' and</code>appc1') create local functions themselves. This means that <code>addc1' must call</code>addc2' and <code>appc1' must call</code>appc2'. The rest of the transformation is a straightforward application of the transformation steps described above:</p>
+                <p>Let's now perform the same technique to the CPS-transformed interpreter given above.  It contains local functions in four places: two in the <code>Add</code> branch and two in the <code>App</code> branch. We call the corresponding top-level functions, from left to right, <code>addc1</code>, <code>addc2</code>, <code>appc1</code> and <code>appc2</code>.
+<br  />An interesting novelty in the interpreter is that some local functions (corresponding to <code>addc1</code> and <code>appc1</code>) create local functions themselves. This means that <code>addc1</code> must call <code>addc2</code> and <code>appc1</code> must call <code>appc2</code>. The rest of the transformation is a straightforward application of the transformation steps described above:</p>
 
             </td></tr><tr>
             <td class="code">
@@ -390,16 +412,16 @@ def g(n : Int)(y : Int) = y * n
             </td>
         </tr>
         
-        <tr id="section_4">
+        <tr id="section_6">
             <td class="docs">
                 <div class="pilwrap">
-                    <a class="pilcrow" href="#section_4">&#182;</a>
+                    <a class="pilcrow" href="#section_6">&#182;</a>
                 </div>
                 <p>The lambda-lifted interpreter contains no local functions anymore, but it still contains higher-order functions, since `addc1' etc. return functions that are passed as parameters to other functions.</p>
 <h2>Defunctionalization</h2>
-<p><em>Defunctionalization</em> is a program transformation technique that turns higher-order programs that have already been lambda-lifted into first-order programs that contain no higher-order functions anymore.  Any program contains only finitely many function definitions. The idea of defunctionalization is to assign a unique identifier to each of these function definitions. The function &ldquo;dispatch&rdquo; then happens in a function <code>apply', which receives the identifier corresponding to a function definition and dispatches the identifier to the right function body. Every function application within the program is then replaced by a call to the</code>apply' function with the function identifier as the first argument.</p>
-<p>In addition to the unique identifier, the <code>apply' function also needs bindings for the free variables in the function body. Hence we need to store the values for these free variables along with the unique identifier. Finally, the</code>apply' function needs to know about the argument to the function. These become additional parameters of the `apply' function.</p>
-<p>Let's illustrate defunctionalization in the `addAndMultNToList' example from above.</p>
+<p><em>Defunctionalization</em> is a program transformation technique that turns higher-order programs that have already been lambda-lifted into first-order programs that contain no higher-order functions anymore.  Any program contains only finitely many function definitions. The idea of defunctionalization is to assign a unique identifier to each of these function definitions. The function &ldquo;dispatch&rdquo; then happens in a function <code>apply</code>, which receives the identifier corresponding to a function definition and dispatches the identifier to the right function body. Every function application within the program is then replaced by a call to the <code>apply</code> function with the function identifier as the first argument.</p>
+<p>In addition to the unique identifier, the <code>apply</code> function also needs bindings for the free variables in the function body. Hence we need to store the values for these free variables along with the unique identifier. Finally, the <code>apply</code> function needs to know about the argument to the function. These become additional parameters of the <code>apply</code> function.</p>
+<p>Let's illustrate defunctionalization in the <code>addAndMultNToList</code> example from above.</p>
 
             </td></tr><tr>
             <td class="code">
@@ -423,10 +445,10 @@ def addAndMultNToList(n : Int, xs : List[Int]) = map(G(n), map(F(n), xs))
             </td>
         </tr>
         
-        <tr id="section_5">
+        <tr id="section_7">
             <td class="docs">
                 <div class="pilwrap">
-                    <a class="pilcrow" href="#section_5">&#182;</a>
+                    <a class="pilcrow" href="#section_7">&#182;</a>
                 </div>
                 <p>Let's now apply defunctionalization to our CPS-transformed interpreter:</p>
 
@@ -466,15 +488,12 @@ def addAndMultNToList(n : Int, xs : List[Int]) = map(G(n), map(F(n), xs))
             </td>
         </tr>
         
-        <tr id="section_6">
+        <tr id="section_8">
             <td class="docs">
                 <div class="pilwrap">
-                    <a class="pilcrow" href="#section_6">&#182;</a>
+                    <a class="pilcrow" href="#section_8">&#182;</a>
                 </div>
-                <p>This interpreter can be seen as an abstract machine. The state space of the abstract
-<br  />machine is (Exp x Env x FunctionValue) U (FunctionValue x Value), where &ldquo;x&rdquo; stands for
-<br  />cross product and &ldquo;U&rdquo; stands for set union. Every case in the pattern matches in
-<br  /><code>apply</code> and <code>eval</code> can be read as a transition in this state space.</p>
+                <p>This interpreter can be seen as an abstract machine. The state space of the abstract machine is (<code>Exp</code> x <code>Env</code> x <code>FunctionValue</code>) U (<code>FunctionValue</code> x <code>Value</code>), where &ldquo;x&rdquo; stands for cross product and &ldquo;U&rdquo; stands for set union. Every case in the pattern matches in <code>apply</code> and <code>eval</code> can be read as a transition in this state space.</p>
 
             </td></tr><tr>
             <td class="code">

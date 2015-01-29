@@ -63,13 +63,16 @@ def map(f : Int => Int, xs : List[Int]) : List[Int] = xs match {
 
 def addAndMultNToList(n : Int, xs : List[Int]) = map(y => y * n, map(y => y + n, xs)) 
 
-/* We create two new top-level functions. Let's call them `f' and `g' Their bodies are respectively `y => y + n' and `y => yn'. We add a parameter for each free variable. In the example, the free variable is `n' in both cases:
- */
+/** 
+We create two new top-level functions. Let's call them ``f`` and ``g`` Their bodies are respectively ``y => y + n`` and ``y => y * n``. We add a parameter for each free variable. In the example, the free variable is ``n`` in both cases:
+*/
 
 def f(n : Int) = (y : Int) => y + n
 def g(n : Int) = (y : Int) => y * n
 
-/* or shorter: */
+/** 
+or shorter: 
+*/
 
 def f(n : Int)(y : Int) = y + n
 def g(n : Int)(y : Int) = y * n
@@ -81,8 +84,8 @@ The local function can now be replaced by a call to the new global function.
 def addAndMultNToList(n : Int, xs : List[Int]) = map(g(n), map(f(n), xs)) 
 
 /**
-Let's now perform the same technique to the CPS-transformed interpreter given above.  It contains local functions in four places: two in the `Add' branch and two in the `App' branch. We call the corresponding top-level functions, from left to right, `addc1', `addc2', `appc1' and `appc2'.
-An interesting novelty in the interpreter is that some local functions (corresponding to `addc1' and `appc1') create local functions themselves. This means that `addc1' must call `addc2' and `appc1' must call `appc2'. The rest of the transformation is a straightforward application of the transformation steps described above:
+Let's now perform the same technique to the CPS-transformed interpreter given above.  It contains local functions in four places: two in the ``Add`` branch and two in the ``App`` branch. We call the corresponding top-level functions, from left to right, ``addc1``, ``addc2``, ``appc1`` and ``appc2``.
+An interesting novelty in the interpreter is that some local functions (corresponding to ``addc1`` and ``appc1``) create local functions themselves. This means that ``addc1`` must call ``addc2`` and ``appc1`` must call ``appc2``. The rest of the transformation is a straightforward application of the transformation steps described above:
 */
 
 object LambdaLifted {
@@ -114,11 +117,11 @@ The lambda-lifted interpreter contains no local functions anymore, but it still 
 
 Defunctionalization
 -------------------
-_Defunctionalization_ is a program transformation technique that turns higher-order programs that have already been lambda-lifted into first-order programs that contain no higher-order functions anymore.  Any program contains only finitely many function definitions. The idea of defunctionalization is to assign a unique identifier to each of these function definitions. The function "dispatch" then happens in a function `apply', which receives the identifier corresponding to a function definition and dispatches the identifier to the right function body. Every function application within the program is then replaced by a call to the `apply' function with the function identifier as the first argument.
+_Defunctionalization_ is a program transformation technique that turns higher-order programs that have already been lambda-lifted into first-order programs that contain no higher-order functions anymore.  Any program contains only finitely many function definitions. The idea of defunctionalization is to assign a unique identifier to each of these function definitions. The function "dispatch" then happens in a function ``apply``, which receives the identifier corresponding to a function definition and dispatches the identifier to the right function body. Every function application within the program is then replaced by a call to the ``apply`` function with the function identifier as the first argument.
 
-In addition to the unique identifier, the `apply' function also needs bindings for the free variables in the function body. Hence we need to store the values for these free variables along with the unique identifier. Finally, the `apply' function needs to know about the argument to the function. These become additional parameters of the `apply' function.
+In addition to the unique identifier, the ``apply`` function also needs bindings for the free variables in the function body. Hence we need to store the values for these free variables along with the unique identifier. Finally, the ``apply`` function needs to know about the argument to the function. These become additional parameters of the ``apply`` function.
 
-Let's illustrate defunctionalization in the `addAndMultNToList' example from above.
+Let's illustrate defunctionalization in the ``addAndMultNToList`` example from above.
 */
 
 sealed abstract class FunctionValue
@@ -172,8 +175,5 @@ object Defunctionalized {
 }
 
 /**
-This interpreter can be seen as an abstract machine. The state space of the abstract
-machine is (Exp x Env x FunctionValue) U (FunctionValue x Value), where "x" stands for
-cross product and "U" stands for set union. Every case in the pattern matches in
-``apply`` and ``eval`` can be read as a transition in this state space.
+This interpreter can be seen as an abstract machine. The state space of the abstract machine is (``Exp`` x ``Env`` x ``FunctionValue``) U (``FunctionValue`` x ``Value``), where "x" stands for cross product and "U" stands for set union. Every case in the pattern matches in ``apply`` and ``eval`` can be read as a transition in this state space.
 */
