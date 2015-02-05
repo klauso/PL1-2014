@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>23-stlc.scala</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+        /*--------------------- Layout and Typography ----------------------------*/
+        body {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+            font-size: 15px;
+            line-height: 22px;
+            color: #252519;
+            margin: 0; padding: 0;
+        }
+        a {
+            color: #261a3b;
+        }
+        a:visited {
+            color: #261a3b;
+        }
+        p {
+            margin: 0 0 15px 0;
+        }
+        h4, h5, h6 {
+            color: #333;
+            padding: 6px 0 6px 0;
+            font-size: 13px;
+        }
+        h2, h3 {
+            padding-bottom: 15px;
+            color: #000;
+            overflow: hidden;
+        }
+        h1 {
+            /*padding-top: 40px;*/
+            padding-bottom: 15px;
+            color: #000;
+        }
+        #container {
+            position: relative;
+        }
+        /*#background {
+            position: fixed;
+            top: 0; left: 525px; right: 0; bottom: 0;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+            z-index: -1;
+        }*/
+        #jump_to, #jump_page {
+            background: white;
+            -webkit-box-shadow: 0 0 25px #777; -moz-box-shadow: 0 0 25px #777;
+            -webkit-border-bottom-left-radius: 5px; -moz-border-radius-bottomleft: 5px;
+            font: 10px Arial;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: right;
+        }
+        #jump_to, #jump_wrapper {
+            position: fixed;
+            right: 0; top: 0;
+            padding: 5px 10px;
+        }
+        #jump_wrapper {
+            padding: 0;
+            display: none;
+        }
+        #jump_to:hover #jump_wrapper {
+            display: block;
+        }
+        #jump_page {
+            padding: 5px 0 3px;
+            margin: 0 0 25px 25px;
+        }
+        #jump_page .source {
+            display: block;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-top: 1px solid #eee;
+        }
+        #jump_page .source:hover {
+            background: #f5f5ff;
+        }
+        #jump_page .source:first-child {
+        }
+        table td {
+            border: 0;
+            outline: 0;
+        }
+        td.docs, th.docs {
+            max-width: 450px;
+            min-width: 450px;
+            min-height: 5px;
+            padding: 10px 25px 1px 50px;
+            overflow-x: hidden;
+            vertical-align: top;
+            text-align: left;
+        }
+        .docs pre {
+            margin: 15px 0 15px;
+            padding-left: 15px;
+        }
+        .docs p tt, .docs p code, .doc code {
+            background: #f8f8ff;
+            border: 1px solid #dedede;
+            font-size: 12px;
+            padding: 0 0.2em;
+        }
+        .pilwrap {
+            position: relative;
+        }
+        .pilcrow {
+            font: 12px Arial;
+            text-decoration: none;
+            color: #454545;
+            position: absolute;
+            top: 3px; left: -20px;
+            padding: 1px 2px;
+            opacity: 0;
+            -webkit-transition: opacity 0.2s linear;
+        }
+        td.docs:hover .pilcrow {
+            opacity: 1;
+        }
+        td.code, th.code {
+            padding: 10px 10px 10px 50px;
+            width: 100%;
+            vertical-align: top;
+            background: #f5f5ff;
+            border-left: 1px solid #e5e5ee;
+        }
+        pre, tt, code {
+            font-size: 12px; line-height: 18px;
+            font-family: Menlo, Monaco, Consolas, "Lucida Console", monospace;
+            margin: 0; padding: 0;
+        }
+
+        /*---------------------- Prettify Syntax Highlighting -----------------------------*/
+        .str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}
+
+        table.doc { margin-bottom: 20px; }
+        td.doc { border-bottom: 1px dashed #708090; }
+        td.param { font-weight: bold; }
+        td.return { font-weight: bold; text-decoration: underline; }
+    </style>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
+    <script src="https://google-code-prettify.googlecode.com/svn/trunk/src/lang-scala.js" type="text/javascript"></script>
+</head>
+
+<body onload="prettyPrint()">
+<div id="container">
+    <div id="background"></div>
+    <div id="jump_to">
+        Jump To &hellip;
+        <div id="jump_wrapper">
+            <div id="jump_page">
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/01-intro.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/01-intro.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/02-desugaring.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/03-ae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/03-ae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/04-wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/04-wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/05-f1wae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/06-fae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/06-fae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/07-lcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/08-rcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/09-bcfae.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/10-gc.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/10-gc.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/11-syntacticvsmeta.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/11-syntacticvsmeta.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/12-churchencoding.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/12-churchencoding.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/13-continuations-1.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/13-continuations-1.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/14-continuations-2.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/14-continuations-2.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/17-firstclasscontinuations.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/17-firstclasscontinuations.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/18-monads.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/18-monads.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/19-monads.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/19-monads.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/20-iomonad.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/20-iomonad.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/21-defunctionalization.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/21-defunctionalization.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/22-typesystems.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/22-typesystems.html
+                </a>
+                
+                <a class="source" href="/Users/klaus/git/PL1-2014/lecturenotes/23-stlc.html">
+                    /Users/klaus/git/PL1-2014/lecturenotes/23-stlc.html
+                </a>
+                
+            </div>
+        </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th class="docs">
+                <h1>23-stlc.scala</h1>
+            </th>
+            <th class="code"></th>
+        </tr>
+        </thead>
+        <tbody>
+        
+        <tr id="section_0">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_0">&#182;</a>
+                </div>
+                <h1>The Simply-Typed Lambda Calculus</h1>
+<p>We start with the untyped substitution-based lambda calculus augmented by the possibility to add type annotations to function definitions. The type annotation is ignored by the interpreter.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>sealed abstract class Type
+
+sealed abstract class Exp
+case class Num(n: Int) extends Exp
+case class Id(name: Symbol) extends Exp
+case class Add(lhs: Exp, rhs: Exp) extends Exp
+implicit def num2exp(n: Int) = Num(n)
+implicit def id2exp(s: Symbol) = Id(s)
+case class Fun(param: Symbol, t: Type, body: Exp) extends Exp
+case class App (funExpr: Exp, argExpr: Exp) extends Exp
+case class Bool(b: Boolean) extends Exp
+
+def freshName(names: Set[Symbol], default: Symbol) : Symbol = {
+  var last : Int = 0
+  var freshName = default  
+  while (names contains freshName) { freshName = Symbol(default.name+last.toString); last += 1; }
+  freshName
+}
+
+def freeVars(e: Exp) : Set[Symbol] =  e match {
+   case Id(x) =&gt; Set(x)
+   case Add(l,r) =&gt; freeVars(l) ++ freeVars(r)
+   case Fun(x,_,body) =&gt; freeVars(body) - x
+   case App(f,a) =&gt; freeVars(f) ++ freeVars(a)
+   case Num(n) =&gt; Set.empty
+   case Bool(b) =&gt; Set.empty
+}
+
+def subst(e1 : Exp, x: Symbol, e2: Exp) : Exp = e1 match {
+  case Num(n) =&gt; e1
+  case Bool(x) =&gt; e1
+  case Add(l,r) =&gt; Add(subst(l,x,e2), subst(r,x,e2))
+  case Id(y) =&gt; if (x == y) e2 else Id(y)
+  case App(f,a) =&gt; App(subst(f,x,e2),subst(a,x,e2))
+  case Fun(param,t,body) =&gt; 
+    if (param == x) e1 else {
+      val fvs = freeVars(body) ++ freeVars(e2)
+      val newvar = freshName(fvs, param)
+      Fun(newvar, t, subst(subst(body, param, Id(newvar)), x, e2))
+    }                            
+}
+
+def eval(e: Exp) : Exp = e match {
+  case Id(v) =&gt; sys.error(&quot;unbound identifier: &quot; + v.name)
+  case Add(l,r) =&gt; (eval(l), eval(r)) match {
+                     case (Num(x),Num(y)) =&gt; Num(x+y)
+                     case _ =&gt; sys.error(&quot;can only add numbers&quot;)
+                    }
+  case App(f,a) =&gt; eval(f) match {
+     case Fun(x,_,body) =&gt; eval( subst(body,x, eval(a)))  // call-by-value
+     case _ =&gt; sys.error(&quot;can only apply functions&quot;)
+  }
+  case _ =&gt; e // numbers and functions evaluate to themselves
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_1">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_1">&#182;</a>
+                </div>
+                <p>We classify values into three types: Booleans, integers, and function types. For function types, we need some abstraction for its input and output; otherwise the type checker cannot be compositional. Luckily we do already have such an abstraction, namely types. Hence <code>Funtype</code> becomes a recursive data type.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>case class BoolType() extends Type
+case class IntType() extends Type
+case class FunType(from: Type, to: Type) extends Type
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_2">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_2">&#182;</a>
+                </div>
+                <p>The type checker for the so-called <em>Simply-Typed Lambda Calculus</em>  (STLC). To deal with identifiers, we need an abstraction of environments. Environments have a type like <code>Map[Symbol,Value]</code>. A <em>type environment</em> (traditionally called gamma) classifies environments point-wise.  A type environment has the form <code>Map[Symbol,Type]</code>. We say that an environment <code>env</code> has type <code>gamma</code>, if for all <code>x</code> on which <code>gamma</code> is defined, <code>typeCheck(env(x),Map.empty) == gamma(x)</code>.</p>
+<p>The type checker for the STLC is as follows:</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'>def typeCheck(e: Exp, gamma: Map[Symbol,Type]) : Type = e match {
+  case Num(n) =&gt; IntType()
+  case Bool(x) =&gt; BoolType()
+  case Add(a,b) =&gt; (typeCheck(a,gamma),typeCheck(b,gamma)) match {
+    case (IntType(),IntType()) =&gt; IntType()
+    case _ =&gt; sys.error(&quot;Type Error in addition&quot;)
+  }
+  case Id(x) =&gt; gamma.get(x) match {
+    case Some(t) =&gt; t
+    case _ =&gt; sys.error(&quot;free variable: &quot; ++ x.toString)
+   } 
+  case App(f,a) =&gt; typeCheck(f,gamma) match {
+    case FunType(from,to) =&gt;  
+      if (from == typeCheck(a,gamma)) to 
+        else sys.error(from.toString ++ &quot; expected, found: &quot; ++ typeCheck(a,gamma).toString)
+    case t =&gt; sys.error(&quot;Type error: function expected, found: &quot; ++ t.toString)
+  }
+  case Fun(x,t,body) =&gt; FunType(t,typeCheck(body,gamma + (x -&gt; t)))
+}
+
+</code></pre>
+            </td>
+        </tr>
+        
+        <tr id="section_3">
+            <td class="docs">
+                <div class="pilwrap">
+                    <a class="pilcrow" href="#section_3">&#182;</a>
+                </div>
+                <h1>Soundness</h1>
+<p>If <code>e: Exp</code> und <code>gamma : Map[Symbol,Type]</code> and <code>typeCheck(e, gamma) == T</code>, then:
+<br  />If<code>env: Map[Symbol,Exp]</code> such that <code>gamma</code> is the type of <code>env</code>,  then <code>eval(e,env) == v</code> and <code>typeCheck(v,Map.empty) == T</code>.</p>
+<p>In particular, the STLC has the special and non-trivial property that all well-typed programs terminate.</p>
+
+            </td></tr><tr>
+            <td class="code">
+                <pre><code class='prettyprint lang-scala'></code></pre>
+            </td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
