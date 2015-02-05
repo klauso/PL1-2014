@@ -32,6 +32,8 @@ Schedule
  * December 18. Lecture: [Automatic CPS Transformation](lecturenotes/14-continuations-2.scala)
  * January 8. Lecture: First-class Continuations
  * January 12. Exercise: [Manual CPS Transformation](exercises/cps.scala)
+ * ...
+ * February 2. *No Exercise Session*
 
 Homework
 --------
