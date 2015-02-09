@@ -34,6 +34,7 @@ Schedule
  * January 12. Exercise: [Manual CPS Transformation](exercises/cps.scala)
  * ...
  * February 2. *No Exercise Session*
+ * February 9. Exercise: [Example exam](example-exam.pdf)
 
 Homework
 --------
